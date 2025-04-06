@@ -1,0 +1,3 @@
+[flake8]
+max-line-length = 88
+exclude = .git,__pycache__,venv,*.egg,build,dist,.tox,.mypy_cache,.pytest_cache,.venv,*.pyc,*.pyo,*.pyd,.env,.venv,*.db,*.sqlite3,*.log,.coverage,.hypothesis
