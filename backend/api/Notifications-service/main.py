@@ -6,8 +6,8 @@ app = FastAPI()
 
 app.include_router(notification_router)
 
+
 @app.on_event("startup")
 async def startup_event():
 
     mq_listener.start_listener()
-

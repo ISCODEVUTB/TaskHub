@@ -5,15 +5,18 @@ from notification_service import NotificationService
 router = APIRouter()
 service = NotificationService()
 
+
 class EmailRequest(BaseModel):
     to: str
     subject: str
     body: str
 
+
 class PushRequest(BaseModel):
     user_id: str
     title: str
     message: str
+
 
 @router.post("/email")
 def send_email(request: EmailRequest):
@@ -22,9 +25,12 @@ def send_email(request: EmailRequest):
         raise HTTPException(status_code=500, detail="Email failed to send")
     return {"message": "Email sent"}
 
+
 @router.post("/push")
 def send_push(request: PushRequest):
-    success = service.send_push(request.user_id, request.title, request.message)
+    success = service.send_push(
+        request.user_id, request.title, request.message)
+
     if not success:
         raise HTTPException(status_code=500, detail="Push notification failed")
     return {"message": "Push notification sent"}

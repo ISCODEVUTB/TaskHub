@@ -6,6 +6,7 @@ SMTP_PORT = 587
 SMTP_USER = "tu-email@gmail.com"
 SMTP_PASSWORD = "tu-contraseña"
 
+
 def send_email(to: str, subject: str, body: str) -> bool:
     try:
         msg = MIMEText(body)

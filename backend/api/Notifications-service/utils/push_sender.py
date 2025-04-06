@@ -5,6 +5,7 @@ from firebase_admin import messaging, credentials
 cred = credentials.Certificate("firebase_credentials.json")
 firebase_admin.initialize_app(cred)
 
+
 def send_push_notification(user_id: str, title: str, message: str) -> bool:
     try:
         message = messaging.Message(
@@ -12,7 +13,7 @@ def send_push_notification(user_id: str, title: str, message: str) -> bool:
                 title=title,
                 body=message,
             ),
-            topic=user_id  
+            topic=user_id
         )
         response = messaging.send(message)
         print(f"Push sent: {response}")
