@@ -8,11 +8,13 @@ class ProjectBase(BaseModel):
 
 
 class ProjectCreate(ProjectBase):
-    pass
+    name: str
+    description: str
 
 
 class ProjectOut(ProjectBase):
     id: int
+    owner_id: int
 
     class Config:
         orm_mode = True

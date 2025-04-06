@@ -3,6 +3,7 @@ from routes.projects_routes import router as project_router
 from database.crud import get_db, get_projects, get_project, create_project
 from models.projects import Project
 from schemas.projects_schema import ProjectCreate, ProjectOut
+from database.auth import require_auth
 
 
 __all__ = [
@@ -15,5 +16,6 @@ __all__ = [
     "create_project",
     "Project",
     "ProjectCreate",
-    "ProjectOut"
+    "ProjectOut",
+    "require_auth"
 ]
