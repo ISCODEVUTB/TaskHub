@@ -26,6 +26,7 @@ jobs:
           pip install pytest pytest-cov
 
       - name: Install service dependencies
+        if: ${{ github.event_name == 'null' }}
         run: |
           pip install -r auth-service/requirements.txt
           pip install -r project-service/requirements.txt
