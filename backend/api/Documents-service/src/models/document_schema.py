@@ -6,6 +6,7 @@ class DocumentBase(BaseModel):
     content: str
     author: Optional[str] = None
 
+
 class DocumentCreate(DocumentBase):
     pass
 
