@@ -1,21 +1,11 @@
-from database.database import Base, engine
-from routes.projects_routes import router as project_router
-from database.crud import get_db, get_projects, get_project, create_project
+from database.DBSelect import get_repo
 from models.projects import Project
 from schemas.projects_schema import ProjectCreate, ProjectOut
-from database.auth import require_auth
 
 
 __all__ = [
-    "Base",
-    "engine",
-    "project_router",
-    "get_db",
-    "get_projects",
-    "get_project",
-    "create_project",
+    "get_repo",
     "Project",
     "ProjectCreate",
     "ProjectOut",
-    "require_auth"
 ]
