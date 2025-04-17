@@ -1,21 +1,9 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
 from notification_service import NotificationService
+from schemas import EmailRequest, PushRequest
 
 router = APIRouter()
 service = NotificationService()
-
-
-class EmailRequest(BaseModel):
-    to: str
-    subject: str
-    body: str
-
-
-class PushRequest(BaseModel):
-    user_id: str
-    title: str
-    message: str
 
 
 @router.post("/email")
@@ -29,8 +17,8 @@ def send_email(request: EmailRequest):
 @router.post("/push")
 def send_push(request: PushRequest):
     success = service.send_push(
-        request.user_id, request.title, request.message)
-
+        request.user_id, request.title, request.message
+    )
     if not success:
         raise HTTPException(status_code=500, detail="Push notification failed")
     return {"message": "Push notification sent"}
