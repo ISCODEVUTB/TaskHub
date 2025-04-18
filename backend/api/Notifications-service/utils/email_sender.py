@@ -8,6 +8,17 @@ SMTP_PASSWORD = "tu-contraseña"
 
 
 def send_email(to: str, subject: str, body: str) -> bool:
+    """
+    Sends an email using the configured SMTP server.
+
+    Args:
+        to (str): The recipient's email address.
+        subject (str): The subject of the email.
+        body (str): The body content of the email.
+
+    Returns:
+        bool: True if the email was sent successfully, False otherwise.
+    """
     try:
         msg = MIMEText(body)
         msg["Subject"] = subject

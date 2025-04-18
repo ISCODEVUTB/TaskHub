@@ -3,10 +3,26 @@ import pika
 
 
 def callback(ch, method, properties, body):
+    """
+    Callback function to process messages from the RabbitMQ queue.
+
+    Args:
+        ch: The channel object.
+        method: Delivery method.
+        properties: Message properties.
+        body: The message body.
+    """
     print(f"Received message: {body}")
 
 
 def start_listener():
+    """
+    Starts a RabbitMQ listener in a separate thread.
+
+    The listener connects to a RabbitMQ server, declares a queue, and consumes
+    messages from the 'notification_queue'. Messages are processed using the
+    `callback` function.
+    """
     def run():
         connection = pika.BlockingConnection(
             pika.ConnectionParameters('localhost'))
