@@ -1,33 +1,37 @@
 from fastapi import FastAPI, Depends
-from manager import ExternalToolManager
 from adapters.ai import AIServiceAdapter
 from adapters.payment import PaymentAdapter
 from adapters.storage import CloudStorageAdapter
-
+from adapters.manager import ExternalToolManager
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
 
 app = FastAPI()
-tool_manager = ExternalToolManager()
+security = HTTPBasic()
 
 
-
-def require_auth():
-    return True
+def require_auth(credentials: HTTPBasicCredentials = Depends(security)):
+    # Aquí podés poner lógica real de autenticación
+    if credentials.username != "admin" or credentials.password != "123":
+        raise Exception("Unauthorized")
 
 
 @app.post("/analyze")
-def analyze(data: dict, auth=Depends(require_auth)):
+def analyze(data: dict, _=Depends(require_auth)):
     tool = AIServiceAdapter()
-    return tool_manager.use_tool(tool, data)
+    manager = ExternalToolManager()
+    return manager.use_tool(tool, data)
 
 
 @app.post("/pay")
-def pay(data: dict, auth=Depends(require_auth)):
+def pay(data: dict, _=Depends(require_auth)):
     tool = PaymentAdapter()
-    return tool_manager.use_tool(tool, data)
+    manager = ExternalToolManager()
+    return manager.use_tool(tool, data)
 
 
 @app.get("/storage-url")
-def get_storage_url(filename: str, auth=Depends(require_auth)):
+def get_storage_url(filename: str, _=Depends(require_auth)):
     tool = CloudStorageAdapter()
-    return tool_manager.use_tool(tool, {"filename": filename})
+    manager = ExternalToolManager()
+    return manager.use_tool(tool, {"filename": filename})
