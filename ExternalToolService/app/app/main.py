@@ -11,7 +11,6 @@ security = HTTPBasic()
 
 
 def require_auth(credentials: HTTPBasicCredentials = Depends(security)):
-    # Aquí podés poner lógica real de autenticación
     if credentials.username != "admin" or credentials.password != "123":
         raise Exception("Unauthorized")
 
