@@ -1,13 +1,13 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends
 from auth_service import AuthService
 from models import LoginRequest, TokenResponse
 from utils.jwt_manager import get_current_user
 
-app = FastAPI()
+router = APIRouter()
 auth_service = AuthService()
 
 
-@app.post("/login", response_model=TokenResponse)
+@router.post("/login", response_model=TokenResponse)
 def login_route(request: LoginRequest):
     """
     Endpoint for user login.
@@ -27,7 +27,7 @@ def login_route(request: LoginRequest):
     return TokenResponse(access_token=token)
 
 
-@app.get("/validate")
+@router.get("/validate")
 def validate_route(user=Depends(get_current_user)):
     """
     Endpoint to validate a JWT token.
@@ -43,7 +43,7 @@ def validate_route(user=Depends(get_current_user)):
     return {"message": f"Token válido. Usuario: {user['sub']}"}
 
 
-@app.post("/logout")
+@router.post("/logout")
 def logout_route(token: str):
     """
     Endpoint for user logout.
