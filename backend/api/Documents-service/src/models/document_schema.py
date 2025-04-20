@@ -1,5 +1,7 @@
-from pydantic import BaseModel
 from typing import Optional
+
+from pydantic import BaseModel
+
 
 class DocumentBase(BaseModel):
     title: str
@@ -9,6 +11,7 @@ class DocumentBase(BaseModel):
 
 class DocumentCreate(DocumentBase):
     pass
+
 
 class Document(DocumentBase):
     id: int
