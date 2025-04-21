@@ -14,6 +14,7 @@ UPLOAD_DIR = "uploads"
 if not os.path.exists(UPLOAD_DIR):
     os.makedirs(UPLOAD_DIR)
 
+
 def get_db():
     db = SessionLocal()
     try:
@@ -21,14 +22,17 @@ def get_db():
     finally:
         db.close()
 
+
 def notify(action: str, doc_id: int):
     try:
         requests.post("http://notification-service/notify", json={
             "action": action,
             "document_id": doc_id
         })
-    except:
-        print(f"No se pudo notificar la acción {action} del documento {doc_id}")
+    except requests.RequestException as e:
+        print(f"No se pudo notificar la acción {action} \
+              del documento {doc_id}: {e}")
+
 
 @router.post("/", response_model=Document)
 def subir_documento(
@@ -37,7 +41,8 @@ def subir_documento(
     archivo: UploadFile = File(...),
     db: Session = Depends(get_db)
 ):
-    filename = f"{datetime.utcnow().timestamp()}_{archivo.filename}"
+    timestamp = datetime.now(datetime.timezone.utc).timestamp()
+    filename = f"{timestamp}_{archivo.filename}"
     path = os.path.join(UPLOAD_DIR, filename)
 
     with open(path, "wb") as buffer:
@@ -55,9 +60,11 @@ def subir_documento(
     notify("subido", db_doc.id)
     return db_doc
 
+
 @router.get("/", response_model=list[Document])
 def listar_documentos(db: Session = Depends(get_db)):
     return db.query(DocumentModel).all()
+
 
 @router.delete("/{doc_id}")
 def eliminar_documento(doc_id: int, db: Session = Depends(get_db)):

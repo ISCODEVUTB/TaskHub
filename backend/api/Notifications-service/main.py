@@ -12,7 +12,7 @@ Routes:
 
 from fastapi import FastAPI, APIRouter, HTTPException
 from notification_service import NotificationService
-from models import EmailRequest, PushRequest
+from src import EmailRequest, PushRequest
 
 app = FastAPI()
 router = APIRouter()

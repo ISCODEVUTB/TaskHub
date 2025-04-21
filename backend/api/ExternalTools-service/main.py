@@ -1,12 +1,12 @@
-from fastapi import FastAPI, Depends, HTTPException
-from adapters.ai import AIServiceAdapter
-from adapters.payment import PaymentAdapter
-from adapters.storage import CloudStorageAdapter
-from adapters.manager import ExternalToolManager
+from fastapi import APIRouter, Depends, HTTPException
+from adapters import AIServiceAdapter
+from adapters import PaymentAdapter
+from adapters import CloudStorageAdapter
+from adapters import ExternalToolManager
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
 
-app = FastAPI()
+router = APIRouter()
 security = HTTPBasic()
 
 
@@ -15,21 +15,21 @@ def require_auth(credentials: HTTPBasicCredentials = Depends(security)):
         raise HTTPException(status_code=401, detail="Unauthorized")
 
 
-@app.post("/analyze")
+@router.post("/analyze")
 def analyze(data: dict, _=Depends(require_auth)):
     tool = AIServiceAdapter()
     manager = ExternalToolManager()
     return manager.use_tool(tool, data)
 
 
-@app.post("/pay")
+@router.post("/pay")
 def pay(data: dict, _=Depends(require_auth)):
     tool = PaymentAdapter()
     manager = ExternalToolManager()
     return manager.use_tool(tool, data)
 
 
-@app.get("/storage-url")
+@router.get("/storage-url")
 def get_storage_url(filename: str, _=Depends(require_auth)):
     tool = CloudStorageAdapter()
     manager = ExternalToolManager()

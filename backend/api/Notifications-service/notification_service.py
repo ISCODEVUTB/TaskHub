@@ -1,5 +1,5 @@
-from utils.email_sender import send_email
-from utils.push_sender import send_push_notification
+from src import send_email
+from src import send_push_notification
 
 
 class NotificationService:
