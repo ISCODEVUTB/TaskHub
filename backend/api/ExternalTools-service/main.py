@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from adapters.ai import AIServiceAdapter
 from adapters.payment import PaymentAdapter
 from adapters.storage import CloudStorageAdapter
@@ -12,7 +12,7 @@ security = HTTPBasic()
 
 def require_auth(credentials: HTTPBasicCredentials = Depends(security)):
     if credentials.username != "admin" or credentials.password != "123":
-        raise Exception("Unauthorized")
+        raise HTTPException(status_code=401, detail="Unauthorized")
 
 
 @app.post("/analyze")
