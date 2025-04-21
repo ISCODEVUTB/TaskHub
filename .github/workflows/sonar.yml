@@ -1,0 +1,50 @@
+name: Monorepo Test & SonarCloud
+
+on:
+  push:
+    branches: [ main , Development ]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  sonarcloud:
+    name: Unified Coverage + SonarCloud
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: Install global test deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov
+
+      - name: Install service dependencies
+        if: ${{ github.event_name == 'null' }}
+        run: |
+          pip install -r auth-service/requirements.txt
+          pip install -r project-service/requirements.txt
+          pip install -r notification-service/requirements.txt
+
+      - name: Run all tests with per-service coverage
+        if: ${{ github.event_name == 'null' }}
+        run: |
+          pytest \
+            --cov=auth-service \
+            --cov=project-service \
+            --cov=notification-service \
+            --cov-report=xml \
+            auth-service/tests project-service/tests notification-service/tests
+
+      - name: SonarCloud Analysis
+        uses: SonarSource/sonarcloud-github-action@v2
+        with:
+          projectBaseDir: .
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
