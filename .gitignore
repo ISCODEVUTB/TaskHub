@@ -1,2 +1,8 @@
 .qodo
 /venv
+.vscode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db

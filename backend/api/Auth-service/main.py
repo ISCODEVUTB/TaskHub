@@ -40,8 +40,6 @@ def validate_route(user=Depends(get_current_user)):
     """
     return {"message": f"Token válido. Usuario: {user['sub']}"}
 
-    return {"message": f"Token válido. Usuario: {user['sub']}"}
-
 
 @router.post("/logout")
 def logout_route(token: str):

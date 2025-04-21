@@ -2,8 +2,12 @@ from fastapi import APIRouter, HTTPException
 from config import DB_USE
 from src import ProjectCreate, ProjectOut
 from src import get_repo
+import os
 
 ProjectRouter = APIRouter()
+
+HOST = os.getenv("PROJECTS_SERVICE_HOST", "0.0.0.0")
+PORT = os.getenv("PROJECTS_SERVICE_PORT", 8001)
 
 db = get_repo(DB_USE)
 
