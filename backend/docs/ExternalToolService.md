@@ -1,11 +1,9 @@
-```markdown
 # ExternalToolService
 
 El servicio `ExternalToolService` es una aplicación basada en FastAPI que proporciona una interfaz para interactuar con herramientas externas como servicios de inteligencia artificial, procesamiento de pagos y almacenamiento en la nube.
 
 ## Estructura del Proyecto
 
-```
 ExternalToolService/
 ├── app/
 │   ├── app/
@@ -16,7 +14,6 @@ ExternalToolService/
 │   │   │   ├── payment.py
 │   │   │   ├── storage.py
 │   │   ├── main.py
-```
 
 ### Archivos Principales
 
@@ -24,19 +21,19 @@ ExternalToolService/
 
 Este archivo define las rutas principales de la API y gestiona la autenticación básica.
 
-- **Rutas**:
+- __Rutas__:
   - `POST /analyze`: Analiza datos utilizando un servicio de inteligencia artificial.
   - `POST /pay`: Procesa pagos utilizando un adaptador de pago.
   - `GET /storage-url`: Genera una URL de almacenamiento para un archivo.
 
-- **Autenticación**:
+- __Autenticación__:
   Utiliza autenticación básica con un usuario y contraseña predeterminados (`admin` y `123`).
 
 #### `adapters/manager.py`
 
 Define la clase base `ExternalTool` y el gestor `ExternalToolManager` para interactuar con herramientas externas.
 
-- **Clases**:
+- __Clases__:
   - `ExternalTool`: Clase abstracta que define el método `execute`.
   - `ExternalToolManager`: Clase que utiliza herramientas externas para ejecutar operaciones.
 
@@ -44,21 +41,21 @@ Define la clase base `ExternalTool` y el gestor `ExternalToolManager` para inter
 
 Implementa el adaptador `AIServiceAdapter` para servicios de inteligencia artificial.
 
-- **Método**:
+- __Método__:
   - `execute(data)`: Devuelve un resumen y un análisis de sentimiento del contenido proporcionado.
 
 #### `adapters/payment.py`
 
 Implementa el adaptador `PaymentAdapter` para procesamiento de pagos.
 
-- **Método**:
+- __Método__:
   - `execute(data)`: Simula el procesamiento de un pago y devuelve el estado.
 
 #### `adapters/storage.py`
 
 Implementa el adaptador `CloudStorageAdapter` para generar URLs de almacenamiento.
 
-- **Método**:
+- __Método__:
   - `execute(data)`: Genera una URL simulada para un archivo.
 
 ## Ejemplo de Uso
@@ -90,23 +87,26 @@ curl -X GET "http://localhost:8000/storage-url?filename=example.txt" \
 
 ## Requisitos
 
-- **Python**: 3.8 o superior
-- **Dependencias**: FastAPI, Uvicorn
+- __Python__: 3.8 o superior
+- __Dependencias__: FastAPI, Uvicorn
 
 ## Instalación
 
 1. Clona el repositorio:
+
    ```bash
    git clone <url-del-repositorio>
    cd ExternalToolService/app
    ```
 
 2. Instala las dependencias:
+
    ```bash
    pip install -r requirements.txt
    ```
 
 3. Ejecuta el servidor:
+
    ```bash
    uvicorn main:app --reload
    ```
@@ -115,4 +115,3 @@ curl -X GET "http://localhost:8000/storage-url?filename=example.txt" \
 
 - Este servicio utiliza autenticación básica para proteger las rutas.
 - Los adaptadores implementan lógica simulada y pueden extenderse para integrarse con servicios reales.
-```

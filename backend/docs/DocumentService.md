@@ -1,4 +1,3 @@
-```markdown
 # Document Service
 
 El microservicio **Document Service** es responsable de gestionar documentos, permitiendo su creación, listado y eliminación. Este servicio está construido con **FastAPI** y utiliza **SQLAlchemy** para la gestión de la base de datos.
@@ -6,18 +5,22 @@ El microservicio **Document Service** es responsable de gestionar documentos, pe
 ## Endpoints
 
 ### 1. Subir Documento
+
 **POST** `/api/documents/`
 
 Sube un nuevo documento al sistema.
 
-#### Parámetros:
+#### Parámetros
+
 - `nombre` (form-data, requerido): Nombre del documento.
 - `proyecto_id` (form-data, requerido): ID del proyecto asociado.
 - `archivo` (form-data, requerido): Archivo a subir.
 
-#### Respuesta:
+#### Respuesta
+
 - **200 OK**: Devuelve el documento creado.
 - **Ejemplo de respuesta:**
+
   ```json
   {
     "id": 1,
@@ -30,13 +33,16 @@ Sube un nuevo documento al sistema.
 ---
 
 ### 2. Listar Documentos
+
 **GET** `/api/documents/`
 
 Obtiene una lista de todos los documentos almacenados.
 
-#### Respuesta:
+#### Respuesta - Listar Documentos
+
 - **200 OK**: Devuelve una lista de documentos.
 - **Ejemplo de respuesta:**
+
   ```json
   [
     {
@@ -51,17 +57,21 @@ Obtiene una lista de todos los documentos almacenados.
 ---
 
 ### 3. Eliminar Documento
+
 **DELETE** `/api/documents/{doc_id}`
 
 Elimina un documento por su ID.
 
-#### Parámetros:
+#### Parámetros - Eliminar Documento
+
 - `doc_id` (path, requerido): ID del documento a eliminar.
 
-#### Respuesta:
+#### Respuesta - Eliminar Documento
+
 - **200 OK**: Documento eliminado exitosamente.
 - **404 Not Found**: Si el documento no existe.
 - **Ejemplo de respuesta:**
+
   ```json
   {
     "msg": "Documento eliminado"
@@ -72,7 +82,6 @@ Elimina un documento por su ID.
 
 ## Estructura del Proyecto
 
-```
 backend/
 └── api/
     └── Documents-service/
@@ -84,9 +93,9 @@ backend/
             │   └── document_schema.py
             └── routes/
                 └── document_routes.py
-```
 
-### Archivos principales:
+### Archivos principales
+
 - **`database.py`**: Configuración de la base de datos SQLite y creación de la sesión.
 - **`document_service.py`**: Punto de entrada del microservicio.
 - **`document_routes.py`**: Define los endpoints del servicio.
@@ -129,10 +138,13 @@ def notify(action: str, doc_id: int):
 
 1. Clona el repositorio.
 2. Instala las dependencias:
+
    ```bash
    pip install -r requirements.txt
    ```
+
 3. Ejecuta el servicio:
+
    ```bash
    uvicorn document_service:app --reload
    ```

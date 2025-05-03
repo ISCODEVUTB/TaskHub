@@ -1,6 +1,7 @@
 # Auth-Service
 
 ## Descripción General
+
 El `auth-service` es un microservicio responsable de gestionar la autenticación de usuarios, incluyendo inicio de sesión, validación de tokens y cierre de sesión. Utiliza FastAPI para la capa de API e integra una base de datos PostgreSQL para los datos de los usuarios.
 
 ---
@@ -22,8 +23,10 @@ El `auth-service` es un microservicio responsable de gestionar la autenticación
 ## Descripción de Archivos
 
 ### 1. `models/schemas.py`
+
 - Contiene modelos de Pydantic para la validación de solicitudes y respuestas.
 - Ejemplo:
+
   ```python
   class LoginRequest(BaseModel):
       username: str
@@ -31,40 +34,50 @@ El `auth-service` es un microservicio responsable de gestionar la autenticación
   ```
 
 ### 2. `utils/db.py`
+
 - Maneja las conexiones y consultas a la base de datos.
 - Ejemplo:
+
   ```python
   def get_connection():
       """Establece una conexión con la base de datos PostgreSQL."""
   ```
 
 ### 3. `utils/jwt_manager.py`
+
 - Administra los JSON Web Tokens (JWT) para la autenticación.
 - Ejemplo:
+
   ```python
   def generate_token(data: dict) -> str:
       """Genera un JWT con la carga útil proporcionada."""
   ```
 
 ### 4. `utils/dependencies.py`
+
 - Proporciona dependencias reutilizables para las rutas de FastAPI, como la validación de tokens.
 - Ejemplo:
+
   ```python
   def get_current_user(token: str = Depends(oauth2_scheme)):
       """Extrae el usuario actual del token JWT."""
   ```
 
 ### 5. `auth_service.py`
+
 - Implementa la lógica principal de autenticación, incluyendo inicio de sesión y validación de tokens.
 - Ejemplo:
+
   ```python
   def login(self, username: str, password: str) -> str | None:
       """Autentica a un usuario y genera un token JWT."""
   ```
 
 ### 6. `main.py`
+
 - Define la aplicación FastAPI y las rutas para el servicio de autenticación.
 - Ejemplo:
+
   ```python
   @router.post("/login", response_model=TokenResponse)
   def login_route(request: LoginRequest):
