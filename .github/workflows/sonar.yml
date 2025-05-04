@@ -40,24 +40,29 @@ jobs:
           pip install pytest pytest-cov coverage
 
       - name: Install service dependencies
+        working-directory: ./backend/api
         run: |
-          for service in Auth Projects Notifications Documents ExternalTools Gateway; do
-            if [ -f "${service}-service/requirements.txt" ]; then
-              pip install -r "${service}-service/requirements.txt"
+          for service in Auth-service Documents-service ExternalTools-service Gateway Notifications-service Projetcs-service; do
+            if [ -f "$service/requirements.txt" ]; then
+              pip install -r "$service/requirements.txt"
             fi
           done
 
       - name: Run all tests with coverage
+        working-directory: ./backend/api
         run: |
           pytest \
-            --cov=auth-service \
-            --cov=project-service \
-            --cov=notification-service \
-            --cov=documents-service \
-            --cov=externaltools-service \
-            --cov=gateway \
+            --cov=Auth-service \
+            --cov=Documents-service \
+            --cov=ExternalTools-service \
+            --cov=Gateway \
+            --cov=Notifications-service \
+            --cov=Projetcs-service \
             --cov-report=xml \
-            */tests
+            */*/tests
+
+      - name: Move coverage report
+        run: mv backend/api/coverage.xml coverage.xml
 
       - name: SonarCloud Analysis
         uses: SonarSource/sonarcloud-github-action@v2
