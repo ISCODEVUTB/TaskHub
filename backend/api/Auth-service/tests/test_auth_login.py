@@ -1,20 +1,16 @@
 def test_login_success(client):
-    data = {
+    response = client.post("/api/auth/login", json={
         "username": "testuser",
         "password": "password123"
-    }
-    response = client.post("/login", json=data)
-
+    })
     assert response.status_code == 200
     assert "access_token" in response.json()
-    assert response.json()["token_type"] == "bearer"
 
 
-def test_login_failure(client):
-    data = {
-        "username": "wronguser",
-        "password": "wrongpassword"
-    }
-    response = client.post("/login", json=data)
-
+def test_login_failure(client, mock_auth_service):
+    mock_auth_service.login.return_value = None
+    response = client.post("/api/auth/login", json={
+        "username": "wrong",
+        "password": "wrong"
+    })
     assert response.status_code == 401

@@ -1,5 +1,5 @@
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 import os
 
@@ -28,9 +28,9 @@ class JWTManager:
         Returns:
             str: The encoded JWT as a string.
         """
+        expires = datetime.now(timezone.utc) + timedelta(hours=1)  # Usamos UTC
         to_encode = data.copy()
-        expire = datetime.utcnow() + timedelta(minutes=TOKEN_EXPIRE_MINUTES)
-        to_encode.update({"exp": expire})
+        to_encode.update({"exp": expires})
         return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
     def verify_token(self, token: str) -> dict | None:

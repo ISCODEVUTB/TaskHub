@@ -1,9 +1,11 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import FastAPI, APIRouter, HTTPException, Depends
 from auth_service import AuthService
-from models import LoginRequest, TokenResponse
-from utils.jwt_manager import get_current_user
+from models.schemas import LoginRequest, TokenResponse
+from utils.dependencies import get_current_user
 
-router = APIRouter()
+app = FastAPI(title="Auth Service", version="1.0.0")
+router = APIRouter(prefix="/api/auth")  # Añadimos el prefijo
+
 auth_service = AuthService()
 
 
@@ -25,6 +27,22 @@ def login_route(request: LoginRequest):
     if not token:
         raise HTTPException(status_code=401, detail="Invalid credentials")
     return TokenResponse(access_token=token)
+
+
+@router.post("/register", status_code=201)  # Añadimos la ruta de registro
+def register_route(request: LoginRequest):
+    """
+    Endpoint for user registration.
+
+    Args:
+    request (LoginRequest): The registration
+    request containing username and password.
+
+    Returns:
+        dict: A response containing the user ID.
+    """
+    user_id = auth_service.register(request.username, request.password)
+    return {"id": user_id}
 
 
 @router.get("/validate")
@@ -59,3 +77,18 @@ def logout_route(token: str):
     if not success:
         raise HTTPException(status_code=400, detail="Logout failed")
     return {"message": "Sesión cerrada correctamente"}
+
+
+@app.get("/")
+def root():
+    """
+    Root endpoint to check if the service is running.
+
+    Returns:
+        dict: A message indicating the service is running.
+    """
+    return {"message": "Auth Service is running"}
+
+
+# Añadimos el router al final
+app.include_router(router)
