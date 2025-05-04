@@ -1,6 +1,6 @@
-from database.AbstradDB import AbstractDB
-from models.projects import Project
-from schemas.projects_schema import ProjectCreate
+from src.database.AbstractDB import AbstractDB
+from src.models.projects import Project
+from src.schemas import ProjectCreateDTO as ProjectCreate
 import json
 
 file_path = "projectsDB.json"
@@ -40,7 +40,7 @@ class JSONDB(AbstractDB):
         """Retrieve all projects from the database."""
         return [Project(**project) for project in self.projects]
 
-    def get_project(self, project_id: int) -> Project:
+    def get_project(self, project_id: int) -> Project | None:
         """Retrieve a specific project by its ID."""
         for project in self.projects:
             if project["id"] == project_id:
@@ -56,7 +56,7 @@ class JSONDB(AbstractDB):
 
     def update_project(
         self, project_id: int, project_data: ProjectCreate
-    ) -> Project:
+    ) -> Project | None:
         """Update an existing project."""
         for project in self.projects:
             if project["id"] == project_id:

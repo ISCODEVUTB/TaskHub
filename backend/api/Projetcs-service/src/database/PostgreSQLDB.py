@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
-from models.projects import Project
-from schemas.projects_schema import ProjectCreate
-from database.AbstradDB import AbstractDB
+from src.models.projects import Project
+from src.schemas import ProjectCreateDTO as ProjectCreate
+from src.database.AbstractDB import AbstractDB
 
 
 class PostgreSQLDB(AbstractDB):
@@ -33,7 +33,7 @@ class PostgreSQLDB(AbstractDB):
 
     def update_project(
         self, project_id: int, project_data: ProjectCreate
-    ) -> Project:
+    ) -> Project | None:
         """Update an existing project."""
         project = self.get_project(project_id)
         if project:

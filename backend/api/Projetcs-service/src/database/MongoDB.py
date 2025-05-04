@@ -1,9 +1,9 @@
 from pymongo import MongoClient
-from database.AbstradDB import AbstractDB
-from models.projects import Project
+from src.database import AbstractDB
+from src.models.projects import Project
 
 
-class MondoDB(AbstractDB):
+class MongoDB(AbstractDB):
     def __init__(self, uri: str, db_name: str):
         """Initialize the MongoDB client and database."""
         self.uri = uri
@@ -23,7 +23,7 @@ class MondoDB(AbstractDB):
         projects = self.collection.find()
         return [Project(**project) for project in projects]
 
-    def get_project(self, project_id: str) -> Project:
+    def get_project(self, project_id: str) -> Project | None:
         """Retrieve a specific project by its ID."""
         project = self.collection.find_one({"_id": project_id})
         if project:

@@ -1,49 +1,56 @@
-from fastapi import APIRouter, HTTPException
-from config import DB_USE
-from src import ProjectCreate, ProjectOut
-from src import get_repo
-import os
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from typing import List
+from src.database.database import get_db
+from src.database.repository import ProjectRepository
+from src.schemas.project_dto import (ProjectCreateDTO, ProjectUpdateDTO,
+                                     ProjectOutputDTO)
 
-ProjectRouter = APIRouter()
+router = APIRouter()
 
-HOST = os.getenv("PROJECTS_SERVICE_HOST", "0.0.0.0")
-PORT = os.getenv("PROJECTS_SERVICE_PORT", 8001)
-
-db = get_repo(DB_USE)
-
-
-@ProjectRouter.post("/projects/", response_model=ProjectOut)
-def create_project(project: ProjectCreate):
-    """Create a new project."""
-    return db.create_project(project)
+NOT_FOUND = "Proyecto no encontrado {id}"
 
 
-@ProjectRouter.get("/projects/", response_model=list[ProjectOut])
-def get_projects():
-    """Get all projects."""
-    return db.get_projects()
+@router.post("/", response_model=ProjectOutputDTO)
+def create_project(project: ProjectCreateDTO, db: Session = Depends(get_db)):
+    repository = ProjectRepository(db)
+    return repository.create(project)
 
 
-@ProjectRouter.get("/projects/{project_id}", response_model=ProjectOut)
-def get_project(project_id: str):
-    """Get a project by ID."""
-    project = db.get_project(project_id)
-    if not project:
-        raise HTTPException(status_code=404, detail="Project not found")
+@router.get("/{project_id}", response_model=ProjectOutputDTO)
+def get_project(project_id: int,
+                db: Session = Depends(get_db)):
+    repository = ProjectRepository(db)
+    project = repository.get_by_id(project_id)
+    if project is None:
+        raise HTTPException(status_code=404,
+                            detail=NOT_FOUND.format(id=project_id))
     return project
 
 
-@ProjectRouter.delete("/projects/{project_id}")
-def delete_project(project_id: str):
-    """Delete a project by ID."""
-    db.delete_project(project_id)
-    return {"detail": "Project deleted"}
+@router.get("/", response_model=List[ProjectOutputDTO])
+def get_projects(db: Session = Depends(get_db)):
+    repository = ProjectRepository(db)
+    return repository.get_all()
 
 
-@ProjectRouter.put("/projects/{project_id}", response_model=ProjectOut)
-def update_project(project_id: str, project: ProjectCreate):
-    """Update a project by ID."""
-    updated_project = db.update_project(project_id, project)
-    if not updated_project:
-        raise HTTPException(status_code=404, detail="Project not found")
+@router.put("/{project_id}", response_model=ProjectOutputDTO)
+def update_project(project_id: int,
+                   project: ProjectUpdateDTO,
+                   db: Session = Depends(get_db)):
+    repository = ProjectRepository(db)
+    updated_project = repository.update(project_id, project)
+    if updated_project is None:
+        raise HTTPException(status_code=404,
+                            detail=NOT_FOUND.format(id=project_id))
     return updated_project
+
+
+@router.delete("/{project_id}")
+def delete_project(project_id: int,
+                   db: Session = Depends(get_db)):
+    repository = ProjectRepository(db)
+    if not repository.delete(project_id):
+        raise HTTPException(status_code=404,
+                            detail=NOT_FOUND.format(id=project_id))
+    return {"message": "Proyecto eliminado"}
