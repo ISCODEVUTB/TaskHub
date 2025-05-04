@@ -26,21 +26,25 @@ jobs:
           pip install pytest pytest-cov
 
       - name: Install service dependencies
-        if: ${{ github.event_name == 'null' }}
         run: |
-          pip install -r auth-service/requirements.txt
-          pip install -r project-service/requirements.txt
-          pip install -r notification-service/requirements.txt
+          pip install -r Auth-service/requirements.txt
+          pip install -r Projects-service/requirements.txt
+          pip install -r Notifications-service/requirements.txt
+          pip install -r Documents-service/requirements.txt
+          pip install -r ExternalTools-service/requirements.txt
+          pip install -r Gateway/requirements.txt
 
       - name: Run all tests with per-service coverage
-        if: ${{ github.event_name == 'null' }}
         run: |
           pytest \
             --cov=auth-service \
             --cov=project-service \
             --cov=notification-service \
+            --cov=documents-service \
+            --cov=externaltools-service \
+            --cov=gateway \
             --cov-report=xml \
-            auth-service/tests project-service/tests notification-service/tests
+            auth-service/tests project-service/tests notification-service/tests documents-service/tests externaltools-service/tests gateway/tests
 
       - name: SonarCloud Analysis
         uses: SonarSource/sonarcloud-github-action@v2
