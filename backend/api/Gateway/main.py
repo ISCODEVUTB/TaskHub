@@ -6,7 +6,10 @@ from routes import (projects_router,
                     notifications_router)
 import os
 
-app = FastAPI(title="TaskHub API", version="0.1.0")
+app = FastAPI(title="TaskHub API",
+              version="1.0.0",
+              description="API for TaskHub",
+              docs_url="/docs")
 
 HOST = os.getenv("HOST", "localhost")
 PORT = int(os.getenv("PORT", 8000))
@@ -38,9 +41,18 @@ app.include_router(notifications_router,
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to TaskHub API"}
+    return {"message": "Welcome to TaskHub API",
+            "version": "1.0.0",
+            "description": "API for TaskHub",
+            "docs_url": "/docs",
+            "repository": "https://github.com/ISCODEVUTB/TaskHub"}
 
 
 @app.get("/api/health")
 async def health_check():
     return {"status": "healthy"}
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host=HOST, port=PORT, log_level="info")
