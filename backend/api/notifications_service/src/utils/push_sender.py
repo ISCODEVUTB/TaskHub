@@ -1,8 +1,15 @@
 import firebase_admin
+import os
 from firebase_admin import messaging, credentials
 
+# Obtener la ruta del archivo de credenciales desde una variable de entorno
+cred_path = os.getenv("FIREBASE_CREDENTIALS_PATH")
+if not cred_path:
+    raise ValueError("La variable de entorno \
+                     FIREBASE_CREDENTIALS_PATH no está configurada.")
 
-cred = credentials.Certificate("firebase_credentials.json")
+# Inicializar Firebase con las credenciales
+cred = credentials.Certificate(cred_path)
 firebase_admin.initialize_app(cred)
 
 

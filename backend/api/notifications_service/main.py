@@ -10,13 +10,29 @@ Routes:
     - POST /push: Sends a push notification.
 """
 
+import os
+import sys
+
 from fastapi import FastAPI, APIRouter, HTTPException
-from backend.api.notifications_service.notification import NotificationService
+from notification import NotificationService
 from src import EmailRequest, PushRequest
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 app = FastAPI(title="Notifications Service API", version="1.0.0")
 router = APIRouter()
 service = NotificationService()
+
+
+@router.get("/")
+def read_root():
+    """
+    Root endpoint for the Notifications service.
+
+    Returns:
+        dict: A welcome message indicating that the service is running.
+    """
+    return {"message": "Welcome to the Notifications Service"}
 
 
 @router.post("/email")
@@ -64,11 +80,11 @@ def send_push(request: PushRequest):
 app.include_router(router)
 
 
-if __name__ == "_main_":
+if __name__ == "__main__":
     """
     Entry point for running the FastAPI application.
 
     The application is served using Uvicorn on host 0.0.0.0 and port 8000.
     """
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="localhost", port=8000)
