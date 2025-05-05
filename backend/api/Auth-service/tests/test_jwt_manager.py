@@ -20,8 +20,8 @@ def test_token_expiration():
     test_data = {"sub": "testuser"}
 
     # Crear token con expiración
-    token = jwt_manager.create_token(test_data)
-    decoded = jwt_manager.validate_token(token)
+    token = jwt_manager.generate_token(test_data)
+    decoded = jwt_manager.verify_token(token)
 
     # Verificar que la expiración es una fecha válida
     assert isinstance(decoded["exp"], datetime)
