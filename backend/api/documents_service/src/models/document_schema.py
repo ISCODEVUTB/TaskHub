@@ -17,8 +17,8 @@ class Document(DocumentBase):
     id: int
 
     class Config:
-        orm_mode = True
-        schema_extra = {
+        from_attributes = True
+        json_schema_extra = {
             "example": {
                 "title": "Sample Document",
                 "content": "This is a sample document content.",
