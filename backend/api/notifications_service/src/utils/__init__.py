@@ -9,12 +9,12 @@ Exports:
     - send_push_notification: Function to send a push notification.
     - start_listening: Function to start listening to a message queue.
 """
-from .email_sender import send_email
-from .push_sender import send_push_notification
-from .mq_listener import start_listening
+from utils.email_sender import send_email
+from utils.push_sender import send_push_notification
+from utils.mq_listener import start_listener
 
 __all__ = [
     "send_email",
     "send_push_notification",
-    "start_listening"
+    "start_listener"
 ]

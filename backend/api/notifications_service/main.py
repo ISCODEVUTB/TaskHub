@@ -11,10 +11,10 @@ Routes:
 """
 
 from fastapi import FastAPI, APIRouter, HTTPException
-from notification_service import NotificationService
+from backend.api.notifications_service.notification import NotificationService
 from src import EmailRequest, PushRequest
 
-app = FastAPI()
+app = FastAPI(title="Notifications Service API", version="1.0.0")
 router = APIRouter()
 service = NotificationService()
 

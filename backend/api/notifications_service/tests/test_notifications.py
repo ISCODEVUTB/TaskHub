@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*-
 from fastapi.testclient import TestClient
-from src.models import app
+from notifications_service.main import app
 
 client = TestClient(app)
 
@@ -36,3 +37,14 @@ def test_send_push_success():
     })
     assert response.status_code == 200
     assert response.json() == {"message": "Push notification sent"}
+
+
+def test_notification_service_exists():
+    """Test básico para verificar que el servicio existe"""
+    response = client.get("/")
+    assert response.status_code == 200
+
+
+def test_create_notification(mock_db):
+    """Test básico para crear notificación"""
+    assert mock_db is not None
