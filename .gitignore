@@ -9,3 +9,5 @@ __pycache__/
 firebase-credentials.json
 *.log
 *.pytest_cache
+.coverage
+.idea

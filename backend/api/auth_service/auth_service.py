@@ -52,7 +52,8 @@ class AuthService:
         """
         return self.jwt_manager.verify_token(token)
 
-    def logout(self, token: str) -> bool:
+    @staticmethod
+    def logout(token: str) -> bool:
         """
         Logs out a user by invalidating their token.
 
@@ -63,3 +64,6 @@ class AuthService:
             bool: True if the logout process is successful.
         """
         return True
+
+    def register(self, username, password):
+        pass

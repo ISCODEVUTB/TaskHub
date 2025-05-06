@@ -9,8 +9,7 @@ class TestCodeUnderTest:
         # Arrange
         from sqlalchemy.orm import Session
         from src import Project
-        from src import ProjectCreate
-        from src import create_project
+        from src import ProjectCreateDTO as ProjectCreate
         # Mock session
         mock_db = MagicMock(spec=Session)
         # Create project data
@@ -35,8 +34,7 @@ class TestCodeUnderTest:
     def test_create_project_missing_required_fields(self):
         # Arrange
         from sqlalchemy.orm import Session
-        from src import ProjectCreate
-        from src import create_project
+        from src import PostgreSQLDB
         from sqlalchemy.exc import IntegrityError
         # Mock session
         mock_db = MagicMock(spec=Session)
@@ -49,10 +47,10 @@ class TestCodeUnderTest:
             "description": "Test Description"
             # Missing name and owner_id
         }
-        project_create = ProjectCreate(**project_data)
+        project_create = PostgreSQLDB.create_project(**project_data)
         # Act & Assert
         with pytest.raises(IntegrityError):
-            create_project(mock_db, project_create)
+            PostgreSQLDB.create_project(mock_db, project_create)
         # Verify the session interactions
         mock_db.add.assert_called_once()
         mock_db.commit.assert_called_once()
