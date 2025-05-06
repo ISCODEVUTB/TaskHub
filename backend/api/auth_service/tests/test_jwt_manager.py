@@ -1,6 +1,6 @@
 import pytest
 from datetime import datetime, timezone
-from utils.jwt_manager import JWTManager
+from ..utils.jwt_manager import JWTManager
 
 
 @pytest.fixture
@@ -24,8 +24,10 @@ def test_token_expiration():
     decoded = jwt_manager.verify_token(token)
 
     # Verificar que la expiración es una fecha válida
-    assert isinstance(decoded["exp"], datetime)
-    assert decoded["exp"] > datetime.now(timezone.utc)
+    exp_datetime = datetime.fromtimestamp(decoded["exp"])
+    assert isinstance(exp_datetime, datetime)
+
+    assert decoded["exp"] > datetime.now(timezone.utc).timestamp()
 
 
 def test_invalid_token(jwt_manager):

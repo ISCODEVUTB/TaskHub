@@ -1,10 +1,13 @@
 from unittest.mock import MagicMock
+from src.database import create_project
 import pytest
 
 
 class TestCodeUnderTest:
-
+    def test_create_project_placeholder(self):
+        pass  # Placeholder for the test logic
     # create_project successfully adds a new project to the database
+
     def test_create_project_success(self):
         # Arrange
         from sqlalchemy.orm import Session
