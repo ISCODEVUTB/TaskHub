@@ -1,9 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes import (projects_router,
-                    documents_router,
-                    externaltools_router,
-                    notifications_router)
+from backend.api.Gateway.routes import (
+    projects_router,
+    documents_router,
+    externaltools_router,
+    notifications_router
+)
 import os
 
 app = FastAPI(title="TaskHub API",
