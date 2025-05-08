@@ -11,3 +11,4 @@ firebase-credentials.json
 *.pytest_cache
 .coverage
 .idea
+*.env

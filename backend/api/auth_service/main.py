@@ -2,6 +2,7 @@ from fastapi import FastAPI, APIRouter, HTTPException, Depends
 from auth_service import AuthService
 from models.schemas import LoginRequest, TokenResponse
 from utils.dependencies import get_current_user
+import os
 
 app = FastAPI(title="Auth Service", version="1.0.0")
 router = APIRouter(prefix="/api/auth")  # Añadimos el prefijo
@@ -92,3 +93,10 @@ def root():
 
 # Añadimos el router al final
 app.include_router(router)
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host=str(os.getenv("HOST")),
+                port=int(os.getenv("PORT")),
+                log_level="info")

@@ -1,7 +1,7 @@
-from ai import AIServiceAdapter
-from manager import ExternalToolManager, ExternalTool
-from payment import PaymentAdapter
-from storage import CloudStorageAdapter
+from adapters.ai import AIServiceAdapter
+from adapters.manager import ExternalToolManager, ExternalTool
+from adapters.payment import PaymentAdapter
+from adapters.storage import CloudStorageAdapter
 
 __all__ = [
     "AIServiceAdapter",

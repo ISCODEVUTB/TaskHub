@@ -3,6 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from projects_routes import router as projects_router
 from src.database.database import Base, engine
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI(title="Projects Service", version="1.0.0")
 
@@ -35,6 +38,6 @@ Base.metadata.create_all(bind=engine)
 if __name__ == "__main__":
     import uvicorn
 
-    HOST = os.getenv("PROJECTS_SERVICE_HOST", "localhost")
-    PORT = int(os.getenv("PROJECTS_SERVICE_PORT", 8001))
+    HOST = os.getenv("HOST_API")
+    PORT = int(os.getenv("PORT_API"))
     uvicorn.run(app, host=HOST, port=PORT)

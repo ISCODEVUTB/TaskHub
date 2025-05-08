@@ -7,7 +7,7 @@ from unittest.mock import patch, MagicMock
 import pytest
 from fastapi.testclient import TestClient
 
-from notifications_service.main import app
+from backend.api.notifications_service.main import app
 
 # Añade el path del servicio si es necesario
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))

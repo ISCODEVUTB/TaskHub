@@ -11,11 +11,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Configuración de base de datos
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://postgres:password@localhost:5432/taskhub_projects"
-    )
-DB_TYPE = os.getenv("DB_USE", "PostgreSQL")
+DATABASE_URL = os.getenv("DATABASE_URL")
+DB_TYPE = os.getenv("DB_USE")
 
 # Crear engine según el tipo de base de datos
 if DB_TYPE == "PostgreSQL":

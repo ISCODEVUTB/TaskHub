@@ -42,3 +42,29 @@ def get_user_by_username(username: str) -> dict | None:
     finally:
         conn.close()
     return None
+
+
+def register_user(username: str, password_hash: str) -> int:
+    """
+    Registers a new user in the database.
+
+    Args:
+        username (str): The username of the new user.
+        password_hash (str): The hashed password of the new user.
+
+    Returns:
+        int: The ID of the newly created user.
+    """
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO users \
+                (username, password_hash) VALUES (%s, %s) RETURNING id",
+                (username, password_hash)
+            )
+            user_id = cur.fetchone()[0]
+            conn.commit()
+            return user_id
+    finally:
+        conn.close()

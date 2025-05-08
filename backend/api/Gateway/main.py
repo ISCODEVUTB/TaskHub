@@ -1,20 +1,24 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.api.Gateway.routes import (
+from routes import (
     projects_router,
     documents_router,
     externaltools_router,
     notifications_router
 )
 import os
+import dotenv
+
+# Cargar las variables de entorno desde el archivo .env
+dotenv.load_dotenv()
 
 app = FastAPI(title="TaskHub API",
               version="1.0.0",
               description="API for TaskHub",
               docs_url="/docs")
 
-HOST = os.getenv("HOST", "localhost")
-PORT = int(os.getenv("PORT", 8000))
+HOST = str(os.getenv("HOST"))
+PORT = int(os.getenv("PORT"))
 
 app.add_middleware(
     CORSMiddleware,
@@ -57,4 +61,5 @@ async def health_check():
 
 if __name__ == "__main__":
     import uvicorn
+    print(f"Starting TaskHub API on {HOST}:{PORT}...")
     uvicorn.run(app, host=HOST, port=PORT, log_level="info")

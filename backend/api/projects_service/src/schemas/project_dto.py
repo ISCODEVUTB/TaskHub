@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
 from datetime import datetime
 
@@ -30,5 +30,16 @@ class ProjectOutputDTO(ProjectBase):
     created_at: datetime
     updated_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
+            "example": {
+                "id": 1,
+                "name": "Project A",
+                "description": "Description of Project A",
+                "owner_id": 1,
+                "created_at": "2023-10-01T12:00:00Z",
+                "updated_at": "2023-10-01T12:00:00Z"
+            }
+        }
+    )

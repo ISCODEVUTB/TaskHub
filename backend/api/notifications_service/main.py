@@ -12,14 +12,18 @@ Routes:
 
 import os
 import sys
+from dotenv import load_dotenv
 
 from fastapi import FastAPI, APIRouter, HTTPException
 from notification import NotificationService
 from src import EmailRequest, PushRequest
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
-app = FastAPI(title="Notifications Service API", version="1.0.0")
+load_dotenv()
+app = FastAPI(title="Notifications Service",
+              version="1.0.0",
+              description="Service for sending notifications",
+              docs_url="/docs")
 router = APIRouter()
 service = NotificationService()
 
@@ -83,8 +87,8 @@ app.include_router(router)
 if __name__ == "__main__":
     """
     Entry point for running the FastAPI application.
-
-    The application is served using Uvicorn on host 0.0.0.0 and port 8000.
     """
     import uvicorn
-    uvicorn.run(app, host="localhost", port=8000)
+    uvicorn.run(app, host=str(os.getenv("HOST")),
+                port=int(os.getenv("PORT")),
+                log_level="info")

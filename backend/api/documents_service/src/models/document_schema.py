@@ -1,5 +1,5 @@
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
 
 
@@ -16,12 +16,13 @@ class DocumentCreate(DocumentBase):
 class Document(DocumentBase):
     id: int
 
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
             "example": {
                 "title": "Sample Document",
                 "content": "This is a sample document content.",
                 "author": "John Doe",
             }
         }
+    )

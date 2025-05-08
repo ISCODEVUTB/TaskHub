@@ -1,7 +1,7 @@
 # auth_service.py
 
 from utils.jwt_manager import JWTManager
-from utils.db import get_user_by_username
+from utils.db import get_user_by_username, register_user
 from passlib.context import CryptContext
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -65,5 +65,13 @@ class AuthService:
         """
         return True
 
-    def register(self, username, password):
-        pass
+    def register(self, username: str, password: str) -> str | None:
+
+        if not username or not password:
+            return None
+        if get_user_by_username(username):
+            return None
+
+        register_user(username, self.hash_password(password))
+
+        return username
