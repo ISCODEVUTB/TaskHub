@@ -1,3 +1,6 @@
+from .auth_fixtures import client, mock_auth_service
+
+
 def test_register_user(client):
     response = client.post("/api/auth/register", json={
         "username": "newuser",

@@ -1,79 +1,48 @@
 from fastapi import FastAPI, APIRouter, HTTPException, Depends
-from auth_service import AuthService
-from models.schemas import LoginRequest, TokenResponse
-from utils.dependencies import get_current_user
+from .auth_service import AuthService
+from .models.schemas import LoginRequest, TokenResponse
+from .utils.dependencies import get_current_user
 import os
 
 app = FastAPI(title="Auth Service", version="1.0.0")
-router = APIRouter(prefix="/api/auth")  # Añadimos el prefijo
+router = APIRouter(prefix="/api/auth")
 
-auth_service = AuthService()
+
+# === Nuevo: función para inyectar el servicio ===
+def get_auth_service():
+    return AuthService()
 
 
 @router.post("/login", response_model=TokenResponse)
-def login_route(request: LoginRequest):
-    """
-    Endpoint for user login.
-
-    Args:
-    request (LoginRequest): The login request containing username and password.
-
-    Returns:
-    TokenResponse: A response containing the access token if login is done.
-
-    Raises:
-        HTTPException: If the credentials are invalid.
-    """
+def login_route(
+    request: LoginRequest,
+    auth_service: AuthService = Depends(get_auth_service)
+):
     token = auth_service.login(request.username, request.password)
     if not token:
         raise HTTPException(status_code=401, detail="Invalid credentials")
     return TokenResponse(access_token=token)
 
 
-@router.post("/register", status_code=201)  # Añadimos la ruta de registro
-def register_route(request: LoginRequest):
-    """
-    Endpoint for user registration.
-
-    Args:
-    request (LoginRequest): The registration
-    request containing username and password.
-
-    Returns:
-        dict: A response containing the user ID.
-    """
+@router.post("/register", status_code=201)
+def register_route(
+    request: LoginRequest,
+    auth_service: AuthService = Depends(get_auth_service)
+):
     user_id = auth_service.register(request.username, request.password)
     return {"id": user_id}
 
 
 @router.get("/validate")
 def validate_route(user=Depends(get_current_user)):
-    """
-    Endpoint to validate a JWT token.
-
-    Args:
-    user: The user information extracted from the token (injected by Depends).
-
-    Returns:
-        dict: A message indicating the token is valid and the user information.
-    """
     return {"message": f"Token válido. Usuario: {user['sub']}"}
 
 
 @router.post("/logout")
-def logout_route(token: str):
-    """
-    Endpoint for user logout.
-
-    Args:
-        token (str): The token to invalidate.
-
-    Returns:
-        dict: A message indicating the session was closed successfully.
-
-    Raises:
-        HTTPException: If the logout process fails.
-    """
+def logout_route(
+    token: str,
+    auth_service: AuthService = Depends(get_auth_service)
+):
     success = auth_service.logout(token)
     if not success:
         raise HTTPException(status_code=400, detail="Logout failed")
@@ -82,21 +51,17 @@ def logout_route(token: str):
 
 @app.get("/")
 def root():
-    """
-    Root endpoint to check if the service is running.
-
-    Returns:
-        dict: A message indicating the service is running.
-    """
     return {"message": "Auth Service is running"}
 
 
-# Añadimos el router al final
+# Finalmente, añadimos las rutas
 app.include_router(router)
 
 if __name__ == "__main__":
     import uvicorn
-
-    uvicorn.run(app, host=str(os.getenv("HOST")),
-                port=int(os.getenv("PORT")),
-                log_level="info")
+    uvicorn.run(
+        app,
+        host=str(os.getenv("HOST", "127.0.0.1")),
+        port=int(os.getenv("PORT", 8000)),
+        log_level="info"
+    )

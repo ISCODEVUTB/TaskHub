@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from src.routes.document_routes import router as documents_router
+from .src.routes.document_routes import router as documents_router
 
 app = FastAPI(title="Documents Service", version="1.0.0")
 

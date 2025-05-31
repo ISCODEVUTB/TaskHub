@@ -1,7 +1,7 @@
 # auth_service.py
 
-from utils.jwt_manager import JWTManager
-from utils.db import get_user_by_username, register_user
+from .utils.jwt_manager import JWTManager
+from .utils.db import get_user_by_username, register_user
 from passlib.context import CryptContext
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from fastapi import status
+from .auth_fixtures import client, mock_auth_service
 
 
 def test_login_success(client):

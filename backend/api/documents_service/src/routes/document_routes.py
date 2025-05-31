@@ -3,10 +3,10 @@ import shutil
 import requests
 from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, Form
 from sqlalchemy.orm import Session
-from datetime import datetime
-from database import SessionLocal
-from src.models.document import Document as DocumentModel
-from src.models.document_schema import Document
+from datetime import datetime,timezone
+from ...database import get_db, SessionLocal
+from ...src.models.document import Document as DocumentModel
+from ...src.models.document_schema import Document
 
 router = APIRouter()
 UPLOAD_DIR = "uploads"
@@ -15,12 +15,6 @@ if not os.path.exists(UPLOAD_DIR):
     os.makedirs(UPLOAD_DIR)
 
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 def notify(action: str, doc_id: int):
@@ -36,22 +30,26 @@ def notify(action: str, doc_id: int):
 
 @router.post("/", response_model=Document)
 def subir_documento(
-    nombre: str = Form(...),
-    proyecto_id: int = Form(...),
+    title: str = Form(...),
+    author: str = Form(None),
     archivo: UploadFile = File(...),
     db: Session = Depends(get_db)
 ):
-    timestamp = datetime.now(datetime.timezone.utc).timestamp()
+    timestamp = datetime.now(timezone.utc).timestamp()
     filename = f"{timestamp}_{archivo.filename}"
     path = os.path.join(UPLOAD_DIR, filename)
 
     with open(path, "wb") as buffer:
         shutil.copyfileobj(archivo.file, buffer)
 
+    # Leer el contenido del archivo
+    with open(path, "r", encoding="utf-8") as f:
+        content = f.read()
+
     db_doc = DocumentModel(
-        nombre=nombre,
-        proyecto_id=proyecto_id,
-        archivo=path
+        title=title,
+        content=content,
+        author=author
     )
     db.add(db_doc)
     db.commit()
@@ -72,8 +70,8 @@ def eliminar_documento(doc_id: int, db: Session = Depends(get_db)):
     if not doc:
         raise HTTPException(status_code=404, detail="Documento no encontrado")
 
-    if os.path.exists(doc.archivo):
-        os.remove(doc.archivo)
+    if os.path.exists(doc.content):
+        os.remove(doc.content)
 
     db.delete(doc)
     db.commit()
