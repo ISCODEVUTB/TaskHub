@@ -1,0 +1,131 @@
+services:
+
+  auth:
+    build:
+      context: ./backend/api/auth_service
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/api/auth_service/.env
+    volumes:
+      - ./backend/api/auth_service:/app
+    networks:
+      - TaskHub_API_Network
+    restart: unless-stopped
+    container_name: taskhub_auth
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  projects:
+    build:
+      context: ./backend/api/projects_service
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    env_file:
+      - ./backend/api/projects_service/.env
+    volumes:
+      - ./backend/api/projects_service:/app
+    networks:
+      - TaskHub_API_Network
+    restart: unless-stopped
+    container_name: taskhub_projects
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  documents:
+    build:
+      context: ./backend/api/documents_service
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8002"
+    env_file:
+      - ./backend/api/documents_service/.env
+    volumes:
+      - ./backend/api/documents_service:/app
+    networks:
+      - TaskHub_API_Network
+    restart: unless-stopped
+    container_name: taskhub_documents
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  notifications:
+    build:
+      context: ./backend/api/notifications_service
+      dockerfile: Dockerfile
+    ports:
+      - "8003:8003"
+    env_file:
+      - ./backend/api/notifications_service/.env
+    volumes:
+      - ./backend/api/notifications_service:/app
+    networks:
+      - TaskHub_API_Network
+    restart: unless-stopped
+    container_name: taskhub_notifications
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  externaltools:
+    build:
+      context: ./backend/api/externaltools_service
+      dockerfile: Dockerfile
+    ports:
+      - "8004:8004"
+    env_file:
+      - ./backend/api/externaltools_service/.env
+    volumes:
+      - ./backend/api/externaltools_service:/app
+    networks:
+      - TaskHub_API_Network
+    restart: unless-stopped
+    container_name: taskhub_externaltools
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  gateway:
+    build:
+      context: ./backend/api/Gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./backend/api/Gateway/.env
+    volumes:
+      - ./backend/api/Gateway:/app
+    depends_on:
+      - auth
+      - projects
+      - documents
+      - notifications
+      - externaltools
+    networks:
+      - TaskHub_API_Network
+    restart: unless-stopped
+    container_name: taskhub_gateway
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  TaskHub_API_Network:
+    driver: bridge
