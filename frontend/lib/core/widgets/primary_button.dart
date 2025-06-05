@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../constants/colors.dart';
 
 class PrimaryButton extends StatelessWidget {
   final String text;
@@ -16,8 +17,9 @@ class PrimaryButton extends StatelessWidget {
       width: double.infinity,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF4E88FF),
+          backgroundColor: AppColors.primary,
           padding: const EdgeInsets.symmetric(vertical: 16),
+          textStyle: Theme.of(context).textTheme.labelLarge,
         ),
         onPressed: onPressed,
         child: Text(
