@@ -133,6 +133,8 @@ def test_get_project_documents(document_service: DocumentService):
         mock_project = MagicMock()
         mock_member = MagicMock()
         mock_doc = MagicMock()
+        mock_query = MagicMock()
+        mock_db.query.return_value = mock_query
         mock_db.query.return_value.filter.return_value.first.side_effect = [mock_project, mock_member]
         mock_db.query.return_value.filter.return_value.all.return_value = [mock_doc]
         result = document_service.get_project_documents("proj1", "user1")
