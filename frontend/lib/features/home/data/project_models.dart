@@ -143,4 +143,34 @@ class ActivityDTO {
         details: json['details'] != null ? Map<String, dynamic>.from(json['details']) : null,
         createdAt: DateTime.parse(json['created_at']),
       );
+}
+
+class TaskCommentDTO {
+  final String id;
+  final String taskId;
+  final String userId;
+  final String content;
+  final String? parentId;
+  final DateTime createdAt;
+  final DateTime? updatedAt;
+
+  TaskCommentDTO({
+    required this.id,
+    required this.taskId,
+    required this.userId,
+    required this.content,
+    this.parentId,
+    required this.createdAt,
+    this.updatedAt,
+  });
+
+  factory TaskCommentDTO.fromJson(Map<String, dynamic> json) => TaskCommentDTO(
+        id: json['id'],
+        taskId: json['task_id'],
+        userId: json['user_id'],
+        content: json['content'],
+        parentId: json['parent_id'],
+        createdAt: DateTime.parse(json['created_at']),
+        updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
+      );
 } 

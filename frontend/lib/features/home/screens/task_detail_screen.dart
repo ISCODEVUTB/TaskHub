@@ -17,11 +17,15 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   TaskDTO? _task;
   bool _loading = true;
   String? _error;
+  List<TaskCommentDTO> _comments = [];
+  bool _commentsLoading = false;
+  String? _commentsError;
 
   @override
   void initState() {
     super.initState();
     _fetchTask();
+    _fetchComments();
   }
 
   Future<void> _fetchTask() async {
@@ -44,6 +48,41 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       setState(() {
         _loading = false;
       });
+    }
+  }
+
+  Future<void> _fetchComments() async {
+    if (widget.taskId == null || widget.projectId == null) return;
+    setState(() {
+      _commentsLoading = true;
+      _commentsError = null;
+    });
+    try {
+      final comments = await ProjectService().getTaskComments(
+        projectId: widget.projectId!,
+        taskId: widget.taskId!,
+      );
+      setState(() => _comments = comments);
+    } catch (e) {
+      setState(() => _commentsError = e.toString());
+    } finally {
+      setState(() => _commentsLoading = false);
+    }
+  }
+
+  Future<void> _addComment(String content) async {
+    if (widget.taskId == null || widget.projectId == null) return;
+    try {
+      await ProjectService().addTaskComment(
+        projectId: widget.projectId!,
+        taskId: widget.taskId!,
+        content: content,
+      );
+      await _fetchComments();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al agregar comentario: $e')),
+      );
     }
   }
 
@@ -86,6 +125,39 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     );
   }
 
+  Widget _buildCommentsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 24),
+        Text('Comentarios', style: Theme.of(context).textTheme.titleMedium),
+        if (_commentsLoading)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Center(child: CircularProgressIndicator()),
+          )
+        else if (_commentsError != null)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Text('Error: $_commentsError', style: const TextStyle(color: Colors.red)),
+          )
+        else if (_comments.isEmpty)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Text('No hay comentarios'),
+          )
+        else
+          ..._comments.map((c) => ListTile(
+                leading: const Icon(Icons.comment),
+                title: Text(c.content),
+                subtitle: Text('Por: ${c.userId} - ${c.createdAt}'),
+              )),
+        const SizedBox(height: 12),
+        _CommentInput(onSend: _addComment),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -114,7 +186,12 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                   ? const Center(child: Text('Tarea no encontrada'))
                   : Stack(
                       children: [
-                        _buildDetail(_task!),
+                        ListView(
+                          children: [
+                            _buildDetail(_task!),
+                            _buildCommentsSection(),
+                          ],
+                        ),
                         Positioned(
                           bottom: 24,
                           right: 24,
@@ -133,6 +210,59 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                         ),
                       ],
                     ),
+    );
+  }
+}
+
+class _CommentInput extends StatefulWidget {
+  final Future<void> Function(String content) onSend;
+  const _CommentInput({required this.onSend});
+
+  @override
+  State<_CommentInput> createState() => _CommentInputState();
+}
+
+class _CommentInputState extends State<_CommentInput> {
+  final _controller = TextEditingController();
+  bool _sending = false;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _send() async {
+    if (_controller.text.trim().isEmpty) return;
+    setState(() => _sending = true);
+    await widget.onSend(_controller.text.trim());
+    _controller.clear();
+    setState(() => _sending = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: TextField(
+            controller: _controller,
+            decoration: const InputDecoration(
+              hintText: 'Escribe un comentario...',
+              border: OutlineInputBorder(),
+              isDense: true,
+              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            ),
+            minLines: 1,
+            maxLines: 3,
+          ),
+        ),
+        const SizedBox(width: 8),
+        IconButton(
+          icon: _sending ? const CircularProgressIndicator() : const Icon(Icons.send),
+          onPressed: _sending ? null : _send,
+        ),
+      ],
     );
   }
 }

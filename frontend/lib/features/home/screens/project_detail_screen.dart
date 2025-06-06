@@ -139,7 +139,76 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                 leading: const Icon(Icons.person),
                 title: Text(m.userId),
                 subtitle: Text(m.role),
+                trailing: IconButton(
+                  icon: const Icon(Icons.remove_circle, color: Colors.red),
+                  tooltip: 'Eliminar miembro',
+                  onPressed: () async {
+                    try {
+                      await _service.removeProjectMember(
+                        projectId: widget.projectId!,
+                        memberId: m.id,
+                      );
+                      await _loadAll();
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error al eliminar miembro: $e')),
+                      );
+                    }
+                  },
+                ),
               )),
+          const SizedBox(height: 12),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.person_add),
+            label: const Text('Agregar miembro'),
+            onPressed: () async {
+              final userIdController = TextEditingController();
+              final roleController = TextEditingController(text: 'member');
+              await showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Agregar miembro'),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextField(
+                        controller: userIdController,
+                        decoration: const InputDecoration(labelText: 'ID de usuario'),
+                      ),
+                      TextField(
+                        controller: roleController,
+                        decoration: const InputDecoration(labelText: 'Rol'),
+                      ),
+                    ],
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Cancelar'),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        try {
+                          await _service.addProjectMember(
+                            projectId: widget.projectId!,
+                            userId: userIdController.text,
+                            role: roleController.text,
+                          );
+                          Navigator.of(context).pop();
+                          await _loadAll();
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Error al agregar miembro: $e')),
+                          );
+                        }
+                      },
+                      child: const Text('Agregar'),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ],
       ),
     );

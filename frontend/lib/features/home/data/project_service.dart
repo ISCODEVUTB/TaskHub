@@ -241,4 +241,86 @@ class ProjectService {
       throw Exception('Failed to update project');
     }
   }
+
+  Future<ProjectMemberDTO> addProjectMember({
+    required String projectId,
+    required String userId,
+    String role = 'member',
+  }) async {
+    final token = await storage.read(key: 'access_token');
+    final body = {
+      'user_id': userId,
+      'role': role,
+    };
+    final response = await http.post(
+      Uri.parse('$baseUrl/projects/$projectId/members'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(body),
+    );
+    if (response.statusCode == 200) {
+      return ProjectMemberDTO.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Failed to add project member');
+    }
+  }
+
+  Future<void> removeProjectMember({
+    required String projectId,
+    required String memberId,
+  }) async {
+    final token = await storage.read(key: 'access_token');
+    final response = await http.delete(
+      Uri.parse('$baseUrl/projects/$projectId/members/$memberId'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to remove project member');
+    }
+  }
+
+  Future<List<TaskCommentDTO>> getTaskComments({
+    required String projectId,
+    required String taskId,
+  }) async {
+    final token = await storage.read(key: 'access_token');
+    final response = await http.get(
+      Uri.parse('$baseUrl/projects/$projectId/tasks/$taskId/comments'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (response.statusCode == 200) {
+      final List data = jsonDecode(response.body);
+      return data.map((e) => TaskCommentDTO.fromJson(e)).toList();
+    } else {
+      throw Exception('Failed to fetch task comments');
+    }
+  }
+
+  Future<TaskCommentDTO> addTaskComment({
+    required String projectId,
+    required String taskId,
+    required String content,
+    String? parentId,
+  }) async {
+    final token = await storage.read(key: 'access_token');
+    final body = {
+      'content': content,
+      if (parentId != null) 'parent_id': parentId,
+    };
+    final response = await http.post(
+      Uri.parse('$baseUrl/projects/$projectId/tasks/$taskId/comments'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(body),
+    );
+    if (response.statusCode == 200) {
+      return TaskCommentDTO.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Failed to add task comment');
+    }
+  }
 } 
