@@ -2,6 +2,20 @@
 
 TaskHub is a comprehensive project management platform built with a microservices architecture using Python, FastAPI, SQLAlchemy, and Supabase.
 
+[![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-white.svg)](https://sonarcloud.io/summary/new_code?id=ISCODEVUTB_TaskHub)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=ISCODEVUTB_TaskHub&metric=coverage)](https://sonarcloud.io/summary/new_code?id=ISCODEVUTB_TaskHub)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ISCODEVUTB_TaskHub&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=ISCODEVUTB_TaskHub)
+
+## API Documentation
+
+Once the services are executing, u can acced them:
+
+- API Gateway: `http://localhost:8000/docs`
+- Auth Service: `http://localhost:8001/docs`
+- Project Service: `http://localhost:8002/docs`
+- Document Service: `http://localhost:8003/docs`
+- Notification Service: `http://localhost:8004/docs`
+- External Tools Service: `http://localhost:8005/docs`
 ## Project Structure
 
 taskhub/
