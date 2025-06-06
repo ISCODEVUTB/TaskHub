@@ -32,7 +32,6 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'poetry'
 
       - name: 📦 Install Poetry
         uses: snok/install-poetry@v1
@@ -40,16 +39,27 @@ jobs:
           version: 2.0.0
           virtualenvs-create: true
           virtualenvs-in-project: true
+          cache: true  # ✅ cache correctamente manejado aquí
+
+      - name: ➕ Add Poetry to PATH manually (just in case)
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: 📦 Install dependencies with Poetry
         working-directory: ./backend
         run: |
           poetry install --no-interaction --no-root
 
-      - name: Run tests with coverage
+      - name: 🧪 Run tests with coverage
         working-directory: ./backend
         env:
           DATABASE_URL: "sqlite:///:memory:"
+          SUPABASE_URL: "https://bhpkrxaqmlnyoxmcxxth.supabase.co"
+          SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJocGtyeGFxbWxueW94bWN4eHRoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NjQ5MDgyMywiZXhwIjoyMDYyMDY2ODIzfQ.2YEnIAHTCiA3ksySifP4tqTZ2Aop4yNsUgqu2nA5Rug"
+          PYTHONPATH: .
+          METABASE_URL: "http://metabase:3000"
+          METABASE_TOKEN: "mb_QfCO9i3RIdsq7rBZ4Sjsf3di3rFJX4dzswCHVY7NIqc="
+          
+          
         run: |
           poetry run pytest api/tests --maxfail=1 --disable-warnings --cov=api --cov-report=term-missing --cov-report=xml
 
@@ -63,3 +73,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
