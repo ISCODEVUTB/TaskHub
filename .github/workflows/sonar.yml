@@ -53,6 +53,7 @@ jobs:
         working-directory: ./backend
         env:
           DATABASE_URL: "sqlite:///:memory:"
+          PYTHONPATH: .
         run: |
           poetry run pytest api/tests --maxfail=1 --disable-warnings --cov=api --cov-report=term-missing --cov-report=xml
 
