@@ -1,8 +1,19 @@
-import pytest
-from unittest.mock import MagicMock, patch
 from datetime import datetime
-from api.notification_service.app.services.notification_service import NotificationService
-from api.notification_service.app.schemas.notification import NotificationCreateDTO, NotificationBatchCreateDTO, NotificationType, NotificationResponseDTO, NotificationPriority
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+from api.notification_service.app.schemas.notification import (
+    NotificationBatchCreateDTO,
+    NotificationCreateDTO,
+    NotificationPriority,
+    NotificationResponseDTO,
+    NotificationType,
+)
+from api.notification_service.app.services.notification_service import (
+    NotificationService,
+)
+
 
 @pytest.fixture
 def mock_db() -> MagicMock:
@@ -168,7 +179,9 @@ def test_update_notification_preferences(notification_service: NotificationServi
     with patch.object(notification_service, "_get_or_create_preferences", return_value=mock_pref), \
          patch.object(notification_service.db, "commit"), \
          patch.object(notification_service.db, "refresh"):
-        from api.notification_service.app.schemas.notification import NotificationPreferencesUpdateDTO
+        from api.notification_service.app.schemas.notification import (
+            NotificationPreferencesUpdateDTO,
+        )
         prefs_data = NotificationPreferencesUpdateDTO(email_enabled=False)
         result = notification_service.update_notification_preferences("user1", prefs_data)
         assert result.user_id == "user1" 

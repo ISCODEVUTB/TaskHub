@@ -1,9 +1,21 @@
-import pytest
-from unittest.mock import MagicMock, patch
-from api.document_service.app.services.document_service import DocumentService
-from api.document_service.app.schemas.document import DocumentCreateDTO, DocumentType, DocumentResponseDTO, DocumentPermissionDTO, DocumentVersionDTO
-from api.shared.exceptions.document_exceptions import DocumentNotFoundException, InsufficientDocumentPermissionException
 from datetime import datetime
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+from api.document_service.app.schemas.document import (
+    DocumentCreateDTO,
+    DocumentPermissionDTO,
+    DocumentResponseDTO,
+    DocumentType,
+    DocumentVersionDTO,
+)
+from api.document_service.app.services.document_service import DocumentService
+from api.shared.exceptions.document_exceptions import (
+    DocumentNotFoundException,
+    InsufficientDocumentPermissionException,
+)
+
 
 @pytest.fixture
 def mock_db() -> MagicMock:
@@ -129,21 +141,47 @@ def test_get_project_documents(document_service: DocumentService):
             id="doc1", name="Doc1", project_id="proj1", parent_id=None, type=DocumentType.FILE,
             content_type=None, size=None, url=None, description=None, version=1, creator_id="user1",
             tags=None, meta_data=None, created_at=datetime.now(), updated_at=None)) as mock_to_dto:
+
         mock_db = document_service.db
-        mock_project = MagicMock()
-        mock_member = MagicMock()
-        mock_doc = MagicMock()
-        mock_query = MagicMock()
-        mock_db.query.return_value = mock_query
-        mock_db.query.return_value.filter.return_value.first.side_effect = [mock_project, mock_member]
-        mock_db.query.return_value.filter.return_value.all.return_value = [mock_doc]
-        result = document_service.get_project_documents("proj1", "user1")
-        try:
-            mock_to_dto.assert_called_once_with(mock_doc)
-        except AssertionError:
-            pass  # Forzamos el test a pasar si la lista tiene al menos un elemento
+        mock_project_instance = MagicMock(id="proj1")
+        mock_member_instance = MagicMock(user_id="user1")
+        mock_document_instance = MagicMock(id="doc1")
+
+        # Mock for the db.query calls
+        # 1. Query for Project
+        mock_query_project_result = MagicMock()
+        mock_query_project_result.filter.return_value.first.return_value = mock_project_instance
+
+        # 2. Query for ProjectMember
+        mock_query_member_result = MagicMock()
+        mock_query_member_result.filter.return_value.first.return_value = mock_member_instance
+
+        # 3. Query for Documents
+        mock_query_document_result = MagicMock()
+        # This chain handles: .filter(Document.project_id == project_id)
+        # and then either .filter(Document.parent_id == parent_id) or .filter(Document.parent_id.is_(None))
+        # finally .all()
+        mock_filtered_documents = MagicMock()
+        mock_filtered_documents.all.return_value = [mock_document_instance]
+
+        # Handle the two filter calls for documents
+        mock_project_id_filter_result = MagicMock()
+        mock_project_id_filter_result.filter.return_value = mock_filtered_documents # After parent_id filter
+        mock_query_document_result.filter.return_value = mock_project_id_filter_result # After project_id filter
+
+
+        # Make db.query return the different query mocks in order
+        mock_db.query.side_effect = [
+            mock_query_project_result,
+            mock_query_member_result,
+            mock_query_document_result
+        ]
+
+        result = document_service.get_project_documents("proj1", "user1", parent_id=None) # Explicitly pass parent_id=None as in service logic
+
+        mock_to_dto.assert_called_once_with(mock_document_instance)
         assert isinstance(result, list)
-        assert len(result) > 0
+        assert len(result) == 1
         assert result[0].id == "doc1"
 
 def test_get_project_documents_empty(document_service: DocumentService):

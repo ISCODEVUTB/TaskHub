@@ -1,11 +1,16 @@
+from typing import List
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
+
 from api.notification_service.app.observers.notification_observer import (
-    EmailNotificationObserver, PushNotificationObserver, SMSNotificationObserver
+    EmailNotificationObserver,
+    PushNotificationObserver,
+    SMSNotificationObserver,
 )
 from api.notification_service.app.schemas.notification import NotificationChannel
 from api.shared.models.notification import Notification
-from typing import List
+
 
 def make_notification(channels: List[NotificationChannel]) -> Notification:
     notif = MagicMock(spec=Notification)

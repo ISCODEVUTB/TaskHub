@@ -1,10 +1,18 @@
-import pytest
-from api.shared.dtos.notification_dtos import (
-    NotificationType, NotificationPriority, NotificationChannel,
-    NotificationCreateDTO, NotificationResponseDTO, NotificationUpdateDTO,
-    NotificationBatchCreateDTO, NotificationPreferencesDTO
-)
 from datetime import datetime
+
+import pytest
+
+from api.shared.dtos.notification_dtos import (
+    NotificationBatchCreateDTO,
+    NotificationChannel,
+    NotificationCreateDTO,
+    NotificationPreferencesDTO,
+    NotificationPriority,
+    NotificationResponseDTO,
+    NotificationType,
+    NotificationUpdateDTO,
+)
+
 
 def test_notification_type_enum():
     assert NotificationType.SYSTEM.value == 'system'

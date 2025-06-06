@@ -1,7 +1,7 @@
 from typing import Any, List
 
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, Path, Security, Body
+from fastapi import Body, Depends, FastAPI, Path, Security
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
@@ -13,16 +13,21 @@ from api.external_tools_service.app.schemas.external_tools import (
     OAuthProviderDTO,
     OAuthRequestDTO,
 )
+from api.external_tools_service.app.services.ai_tools import query_huggingface
+from api.external_tools_service.app.services.analytics_tools import (
+    get_metabase_card_data,
+)
+from api.external_tools_service.app.services.calendar_tools import (
+    create_calendar_event,
+    list_calendar_events,
+)
 from api.external_tools_service.app.services.external_tools_service import (
     ExternalToolsService,
 )
 from api.shared.exceptions.auth_exceptions import InvalidTokenException
+from api.shared.middleware.auth_middleware import auth_middleware
 from api.shared.utils.db import get_db
 from api.shared.utils.jwt import decode_token
-from api.shared.middleware.auth_middleware import auth_middleware
-from api.external_tools_service.app.services.analytics_tools import get_metabase_card_data
-from api.external_tools_service.app.services.ai_tools import query_huggingface
-from api.external_tools_service.app.services.calendar_tools import list_calendar_events, create_calendar_event
 
 # Load environment variables
 load_dotenv()

@@ -1,10 +1,15 @@
+from unittest.mock import MagicMock, patch
+
 import pytest
+
 from api.external_tools_service.app.adapters.oauth_adapter import (
-    OAuthAdapterFactory, GitHubOAuthAdapter, GoogleOAuthAdapter
+    GitHubOAuthAdapter,
+    GoogleOAuthAdapter,
+    OAuthAdapterFactory,
 )
 from api.external_tools_service.app.schemas.external_tools import ExternalToolType
 from api.shared.models.external_tools import OAuthProvider
-from unittest.mock import MagicMock, patch
+
 
 @pytest.fixture
 def github_provider() -> OAuthProvider:

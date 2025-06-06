@@ -1,9 +1,12 @@
-from datetime import timedelta, datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict
+from unittest.mock import patch
+
 import pytest
 from jose import JWTError
-from unittest.mock import patch
+
 from api.shared.utils import jwt as jwt_utils
+
 
 @pytest.fixture(autouse=True)
 def setup_jwt_env(monkeypatch: Any):

@@ -1,6 +1,9 @@
+from unittest.mock import MagicMock, patch
+
 from fastapi.testclient import TestClient
+
 from api.auth_service.app.main import app
-from unittest.mock import patch, MagicMock
+
 
 def test_auth_health_check() -> None:
     client = TestClient(app)

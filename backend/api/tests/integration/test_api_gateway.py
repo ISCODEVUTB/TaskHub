@@ -1,8 +1,10 @@
-from fastapi.testclient import TestClient
-from fastapi import FastAPI
-from api.api_gateway.main import app as real_app
-from unittest.mock import patch, MagicMock
 from typing import Any, Dict, List
+from unittest.mock import MagicMock, patch
+
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
+
+from api.api_gateway.main import app as real_app
 
 # Crea una app de test sin middlewares
 app = FastAPI()

@@ -1,5 +1,7 @@
 import pytest
-from api.api_gateway.utils.service_registry import service_registry, ServiceRegistry
+
+from api.api_gateway.utils.service_registry import ServiceRegistry, service_registry
+
 
 @pytest.fixture
 def registry() -> ServiceRegistry:

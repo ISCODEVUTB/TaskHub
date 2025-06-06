@@ -1,12 +1,23 @@
-import pytest
-from api.shared.dtos.project_dtos import (
-    ProjectStatus, TaskPriority, TaskStatus,
-    ProjectCreateDTO, ProjectUpdateDTO, ProjectResponseDTO,
-    TaskCreateDTO, TaskUpdateDTO, TaskResponseDTO,
-    ProjectMemberCreateDTO, ProjectMemberUpdateDTO, ProjectMemberResponseDTO,
-    ActivityLogDTO
-)
 from datetime import datetime
+
+import pytest
+
+from api.shared.dtos.project_dtos import (
+    ActivityLogDTO,
+    ProjectCreateDTO,
+    ProjectMemberCreateDTO,
+    ProjectMemberResponseDTO,
+    ProjectMemberUpdateDTO,
+    ProjectResponseDTO,
+    ProjectStatus,
+    ProjectUpdateDTO,
+    TaskCreateDTO,
+    TaskPriority,
+    TaskResponseDTO,
+    TaskStatus,
+    TaskUpdateDTO,
+)
+
 
 def test_project_status_enum() -> None:
     assert ProjectStatus.PLANNING.value == 'planning'

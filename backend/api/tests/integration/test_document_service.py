@@ -1,12 +1,12 @@
-from fastapi.testclient import TestClient
-from api.document_service.app.main import app
-from api.document_service.app.schemas.document import DocumentType
-from unittest.mock import patch, MagicMock
 from typing import Any
+from unittest.mock import MagicMock, patch
+from datetime import datetime
 
-def _pass_auth_middleware(req: Any, call_next: Any) -> Any:
-    setattr(req.state, "user_id", "uid")  # Set a mock user ID using setattr
-    return call_next(req)
+from fastapi.testclient import TestClient
+
+from api.document_service.app.main import app
+from api.document_service.app.schemas.document import DocumentType, DocumentResponseDTO
+
 
 def test_document_health_check() -> None:
     client = TestClient(app)
@@ -14,36 +14,49 @@ def test_document_health_check() -> None:
     assert response.status_code == 200
     assert response.json() == {"status": "healthy"}
 
-@patch("api.document_service.app.main.get_current_user", return_value="uid")
-@patch("api.document_service.app.main.get_db", return_value=MagicMock())
+@patch("api.document_service.app.main.get_db", return_value=MagicMock()) # Keep this patch
 @patch("api.document_service.app.services.document_service.DocumentService.create_document")
-@patch("api.document_service.app.main.auth_middleware", new=_pass_auth_middleware)
-def test_create_document(mock_create_document: MagicMock, mock_db: Any, mock_user: Any) -> None:
+def test_create_document(mock_create_document: MagicMock, mock_db_fixture: Any) -> None: # Renamed mock_db to avoid clash if get_db is imported
+    # Import get_current_user from the app's module to use as a key for dependency_overrides
+    from api.document_service.app.main import get_current_user
+
+    app.dependency_overrides[get_current_user] = lambda: "uid" # Override dependency
+
     client = TestClient(app)
-    mock_response = {
-        "id": "docid",
-        "name": "TestDoc",
-        "project_id": "pid",
-        "type": DocumentType.FILE,
-        "version": 1,
-        "creator_id": "uid",
-        "created_at": "2025-01-01T00:00:00Z"
-    }
-    mock_create_document.return_value = mock_response
+
+    mock_dto_response = DocumentResponseDTO(
+        id="docid",
+        name="TestDoc",
+        project_id="pid",
+        type=DocumentType.FILE,
+        version=1,
+        creator_id="uid",
+        created_at=datetime.fromisoformat("2025-01-01T00:00:00+00:00"),
+        parent_id=None,
+        content_type="application/octet-stream",
+        size=0,
+        url=None,
+        description=None,
+        tags=[],
+        meta_data={},
+        updated_at=None
+    )
+    mock_create_document.return_value = mock_dto_response
     
     payload = {
         "name": "TestDoc",
         "project_id": "pid",
         "type": "file"
     }
-    headers = {"Authorization": "Bearer testtoken"}
-    response = client.post("/documents", json=payload, headers=headers)
+    # headers = {"Authorization": "Bearer testtoken"} # Not needed if get_current_user is properly overridden
+    response = client.post("/documents", json=payload) # Removed headers
     
-    try:
-        assert response.status_code == 200
-    except AssertionError:
-        assert response.status_code == 401  # Forzamos el test a pasar si es 401
+    assert response.status_code == 200, f"Expected status 200, got {response.status_code}. Response: {response.text}"
     data = response.json()
     assert data["name"] == "TestDoc"
     assert data["project_id"] == "pid"
     assert data["type"] == "file"
+    assert data["id"] == "docid"
+    assert data["creator_id"] == "uid"
+
+    app.dependency_overrides = {} # Clean up

@@ -4,12 +4,12 @@ from dotenv import load_dotenv
 from fastapi import (
     Depends,
     FastAPI,
+    File,
     Form,
     Path,
     Query,
     Security,
     UploadFile,
-    File,
 )
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
@@ -26,11 +26,13 @@ from api.document_service.app.schemas.document import (
     DocumentVersionDTO,
 )
 from api.document_service.app.services.document_service import DocumentService
+from api.external_tools_service.app.services.document_tools import (
+    process_document_with_libreoffice,
+)
 from api.shared.exceptions.auth_exceptions import InvalidTokenException
+from api.shared.middleware.auth_middleware import auth_middleware
 from api.shared.utils.db import get_db
 from api.shared.utils.jwt import decode_token
-from api.shared.middleware.auth_middleware import auth_middleware
-from api.external_tools_service.app.services.document_tools import process_document_with_libreoffice
 
 # Load environment variables
 load_dotenv()
@@ -430,8 +432,8 @@ async def convert_document(
     """
     Convierte un documento usando LibreOffice Online y lo sube a Supabase Storage.
     """
-    import tempfile
     import shutil
+    import tempfile
     if not supabase_path:
         supabase_path = f"converted/{file.filename}.{output_format}"
     with tempfile.NamedTemporaryFile(delete=False) as tmp:

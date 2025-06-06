@@ -1,6 +1,8 @@
 import os
+
 import sib_api_v3_sdk
 from sib_api_v3_sdk.rest import ApiException
+
 
 def send_email_brevo(to: str, subject: str, body: str) -> bool:
     """

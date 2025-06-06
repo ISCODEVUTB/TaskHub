@@ -1,9 +1,16 @@
 import pytest
+
 from api.shared.exceptions.project_exceptions import (
-    ProjectNotFoundException, TaskNotFoundException, ProjectMemberNotFoundException,
-    NotProjectMemberException, InsufficientProjectRoleException, ProjectLimitExceededException,
-    TaskLimitExceededException, InvalidTaskStatusTransitionException
+    InsufficientProjectRoleException,
+    InvalidTaskStatusTransitionException,
+    NotProjectMemberException,
+    ProjectLimitExceededException,
+    ProjectMemberNotFoundException,
+    ProjectNotFoundException,
+    TaskLimitExceededException,
+    TaskNotFoundException,
 )
+
 
 def test_project_not_found() -> None:
     exc = ProjectNotFoundException()

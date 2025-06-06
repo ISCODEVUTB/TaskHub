@@ -17,9 +17,9 @@ from api.notification_service.app.services.notification_service import (
     NotificationService,
 )
 from api.shared.exceptions.auth_exceptions import InvalidTokenException
+from api.shared.middleware.auth_middleware import auth_middleware
 from api.shared.utils.db import get_db
 from api.shared.utils.jwt import decode_token
-from api.shared.middleware.auth_middleware import auth_middleware
 
 # Load environment variables
 load_dotenv()

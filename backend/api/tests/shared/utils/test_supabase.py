@@ -1,6 +1,9 @@
-from unittest.mock import patch, MagicMock
-from api.shared.utils.supabase import SupabaseManager
+from unittest.mock import MagicMock, patch
+
 import pytest
+
+from api.shared.utils.supabase import SupabaseManager
+
 
 def test_singleton_instance():
     inst1 = SupabaseManager()

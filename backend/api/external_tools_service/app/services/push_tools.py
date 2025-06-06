@@ -1,5 +1,7 @@
 import os
+
 import requests
+
 
 def send_gotify_notification(message: str, title: str = "Notificación", priority: int = 5) -> bool:
     """

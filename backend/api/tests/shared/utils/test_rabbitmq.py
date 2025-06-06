@@ -1,6 +1,8 @@
-from api.shared.utils.rabbitmq import RabbitMQManager
-from unittest.mock import MagicMock
 from typing import Any
+from unittest.mock import MagicMock
+
+from api.shared.utils.rabbitmq import RabbitMQManager
+
 
 def test_singleton_instance() -> None:
     manager1 = RabbitMQManager()

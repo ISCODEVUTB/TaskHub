@@ -1,13 +1,13 @@
+from datetime import datetime
+from typing import Any
+from unittest.mock import MagicMock, patch
+
 from fastapi.testclient import TestClient
+
 from api.project_service.app.main import app
 from api.shared.dtos.project_dtos import ProjectStatus
-from unittest.mock import patch, MagicMock
-from typing import Any
-from datetime import datetime
+from api.project_service.app.schemas.project import ProjectResponseDTO
 
-def _pass_auth_middleware(req: Any, call_next: Any) -> Any:
-    setattr(req.state, "user_id", "uid")  # Set a mock user ID using setattr
-    return call_next(req)
 
 def test_project_health_check() -> None:
     client = TestClient(app)
@@ -15,33 +15,44 @@ def test_project_health_check() -> None:
     assert response.status_code == 200
     assert response.json() == {"status": "healthy"}
 
-@patch("api.project_service.app.main.get_current_user", return_value="uid")
-@patch("api.project_service.app.main.get_db", return_value=MagicMock())
+@patch("api.project_service.app.main.get_db", return_value=MagicMock()) # Keep this patch
 @patch("api.project_service.app.services.project_service.ProjectService.create_project")
-@patch("api.project_service.app.main.auth_middleware", new=_pass_auth_middleware)
-def test_create_project(mock_create_project: MagicMock, mock_db: Any, mock_user: Any) -> None:
+def test_create_project(mock_create_project: MagicMock, mock_db_fixture: Any) -> None:
+    from api.project_service.app.main import get_current_user # Import for override key
+    app.dependency_overrides[get_current_user] = lambda: "uid"
+
     client = TestClient(app)
-    mock_response = {
-        "id": "pid",
-        "name": "TestProject",
-        "status": ProjectStatus.PLANNING,
-        "owner_id": "uid",
-        "created_at": datetime.now().isoformat()
-    }
-    mock_create_project.return_value = mock_response
+
+    # Ensure all required fields for ProjectResponseDTO are present
+    mock_dto_response = ProjectResponseDTO(
+        id="pid",
+        name="TestProject",
+        description=None, # Add missing required fields or ensure they are optional
+        start_date=None,
+        end_date=None,
+        status=ProjectStatus.PLANNING,
+        owner_id="uid",
+        tags=[],
+        meta_data={},
+        created_at=datetime.now(),
+        updated_at=None
+    )
+    mock_create_project.return_value = mock_dto_response
     
     payload = {
         "name": "TestProject",
-        "status": "planning"
+        "status": "planning",
+        # Add other fields if ProjectCreateDTO requires them, e.g., description
+        "description": "Test Description"
     }
-    headers = {"Authorization": "Bearer testtoken"}
-    response = client.post("/projects", json=payload, headers=headers)
+    # headers = {"Authorization": "Bearer testtoken"} # Not needed
+    response = client.post("/projects", json=payload) # Removed headers
     
-    try:
-        assert response.status_code == 200
-    except AssertionError:
-        assert response.status_code == 401  # Forzamos el test a pasar si es 401
+    assert response.status_code == 200, f"Expected status 200, got {response.status_code}. Response: {response.text}"
     data = response.json()
     assert data["name"] == "TestProject"
-    assert data["status"] == "planning"
+    assert data["status"] == ProjectStatus.PLANNING.value # Compare with enum value
     assert data["owner_id"] == "uid"
+    assert data["id"] == "pid"
+
+    app.dependency_overrides = {} # Clean up

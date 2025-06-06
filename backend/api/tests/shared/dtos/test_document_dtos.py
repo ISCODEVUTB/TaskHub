@@ -1,10 +1,18 @@
 from datetime import datetime
+
 import pytest
 from pydantic import ValidationError
+
 from api.shared.dtos.document_dtos import (
-    DocumentType, DocumentCreateDTO, DocumentUpdateDTO, DocumentResponseDTO,
-    DocumentVersionDTO, DocumentPermissionDTO, DocumentUploadResponseDTO
+    DocumentCreateDTO,
+    DocumentPermissionDTO,
+    DocumentResponseDTO,
+    DocumentType,
+    DocumentUpdateDTO,
+    DocumentUploadResponseDTO,
+    DocumentVersionDTO,
 )
+
 
 def test_document_type_enum():
     assert DocumentType.FILE.value == 'file'

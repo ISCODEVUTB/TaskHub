@@ -1,11 +1,11 @@
 import os
 from abc import ABC, abstractmethod
 
-from api.notification_service.app.schemas.notification import NotificationChannel
-from api.shared.models.notification import Notification
 from api.external_tools_service.app.services.email_tools import send_email_brevo
 from api.external_tools_service.app.services.push_tools import send_gotify_notification
 from api.external_tools_service.app.services.sms_tools import send_sms_twilio
+from api.notification_service.app.schemas.notification import NotificationChannel
+from api.shared.models.notification import Notification
 
 
 class NotificationObserver(ABC):

@@ -1,5 +1,11 @@
-from api.shared.models.external_tools import OAuthProvider, ExternalToolConnection, ExternalResource
 from datetime import datetime
+
+from api.shared.models.external_tools import (
+    ExternalResource,
+    ExternalToolConnection,
+    OAuthProvider,
+)
+
 
 def test_oauth_provider_model_instantiation():
     provider = OAuthProvider(

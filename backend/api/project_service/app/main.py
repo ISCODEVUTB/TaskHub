@@ -11,7 +11,6 @@ from api.project_service.app.commands.task_commands import (
     ChangeTaskStatusCommand,
     CommandInvoker,
 )
-from api.shared.middleware.auth_middleware import auth_middleware
 from api.project_service.app.schemas.activity import ActivityLogResponseDTO
 from api.project_service.app.schemas.project import (
     ProjectCreateDTO,
@@ -32,6 +31,7 @@ from api.project_service.app.services.activity_service import ActivityService
 from api.project_service.app.services.project_service import ProjectService
 from api.project_service.app.services.task_service import TaskService
 from api.shared.exceptions.auth_exceptions import InvalidTokenException
+from api.shared.middleware.auth_middleware import auth_middleware
 from api.shared.utils.db import get_db
 from api.shared.utils.jwt import decode_token
 

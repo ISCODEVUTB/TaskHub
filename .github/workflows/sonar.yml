@@ -61,7 +61,7 @@ jobs:
           
           
         run: |
-          poetry run pytest api/tests --maxfail=1 --disable-warnings --cov=api --cov-report=term-missing --cov-report=xml
+          poetry run pytest api/tests --disable-warnings --cov=api --cov-report=term-missing --cov-report=xml
 
       - name: 📄 Move coverage report to root
         run: mv ./backend/coverage.xml ./coverage.xml

@@ -1,8 +1,14 @@
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
+
+from api.project_service.app.schemas.task import TaskCommentCreateDTO, TaskCreateDTO
 from api.project_service.app.services.task_service import TaskService
-from api.project_service.app.schemas.task import TaskCreateDTO, TaskCommentCreateDTO
-from api.shared.exceptions.project_exceptions import InsufficientProjectRoleException, ProjectNotFoundException
+from api.shared.exceptions.project_exceptions import (
+    InsufficientProjectRoleException,
+    ProjectNotFoundException,
+)
+
 
 @pytest.fixture
 def mock_db() -> MagicMock:
@@ -96,8 +102,9 @@ def test_update_task_not_found(task_service: TaskService) -> None:
             task_service.update_task("proj1", "task1", MagicMock(), "user1")
 
 def test_create_task_invalid_data(task_service: TaskService) -> None:
-    from api.project_service.app.schemas.task import TaskCreateDTO
     import pytest
+
+    from api.project_service.app.schemas.task import TaskCreateDTO
     with pytest.raises(Exception):
         TaskCreateDTO(title="")
 

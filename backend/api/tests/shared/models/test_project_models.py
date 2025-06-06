@@ -1,5 +1,13 @@
-from api.shared.models.project import Project, ProjectMember, Task, TaskComment, ActivityLog
 from datetime import datetime
+
+from api.shared.models.project import (
+    ActivityLog,
+    Project,
+    ProjectMember,
+    Task,
+    TaskComment,
+)
+
 
 def test_project_model_instantiation():
     project = Project(id='pid', name='Project', status='planning', owner_id='uid', created_at=datetime.now())

@@ -1,7 +1,8 @@
 import os
-from typing import Any, Dict, Optional
-from caldav import DAVClient, Calendar
 from datetime import datetime
+from typing import Any, Dict, Optional
+
+from caldav import Calendar, DAVClient
 
 RADICALE_URL = os.getenv("RADICALE_URL", "http://radicale:5232/")
 RADICALE_USERNAME = os.getenv("RADICALE_USERNAME", None)
@@ -40,8 +41,10 @@ def create_calendar_event(summary: str, dtstart: datetime, dtend: datetime, cale
     """
     Crea un evento en un calendario CalDAV (Radicale).
     """
-    from icalendar import Event, Calendar as ICalendar
     import uuid
+
+    from icalendar import Calendar as ICalendar
+    from icalendar import Event
     client = get_caldav_client()
     principal = client.principal()
     calendars = principal.calendars()

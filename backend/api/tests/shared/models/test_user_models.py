@@ -1,5 +1,7 @@
-from api.shared.models.user import User, Role, RolePermission
 from datetime import datetime
+
+from api.shared.models.user import Role, RolePermission, User
+
 
 def test_user_model_instantiation():
     user = User(

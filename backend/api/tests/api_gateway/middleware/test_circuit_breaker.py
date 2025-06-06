@@ -1,8 +1,15 @@
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 from fastapi import HTTPException, Request
 from fastapi.responses import JSONResponse
-from api.api_gateway.middleware.circuit_breaker import circuit_breaker, CircuitState, circuit_breaker_middleware
+
+from api.api_gateway.middleware.circuit_breaker import (
+    CircuitState,
+    circuit_breaker,
+    circuit_breaker_middleware,
+)
+
 
 class DummyCallNext:
     def __init__(self, response: JSONResponse) -> None:

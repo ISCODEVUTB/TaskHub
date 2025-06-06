@@ -1,5 +1,7 @@
-from api.shared.models.document import Document, DocumentVersion, DocumentPermission
 from datetime import datetime
+
+from api.shared.models.document import Document, DocumentPermission, DocumentVersion
+
 
 def test_document_model_instantiation():
     doc = Document(

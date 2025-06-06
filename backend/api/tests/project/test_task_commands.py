@@ -1,7 +1,12 @@
 from unittest.mock import MagicMock
+
 from api.project_service.app.commands.task_commands import (
-    UpdateTaskCommand, AssignTaskCommand, ChangeTaskStatusCommand, CommandInvoker
+    AssignTaskCommand,
+    ChangeTaskStatusCommand,
+    CommandInvoker,
+    UpdateTaskCommand,
 )
+
 
 def test_update_task_command_execute_and_undo():
     db = MagicMock()

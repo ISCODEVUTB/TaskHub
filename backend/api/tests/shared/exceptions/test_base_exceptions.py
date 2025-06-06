@@ -1,8 +1,17 @@
 import pytest
+
 from api.shared.exceptions.base_exceptions import (
-    BaseAPIException, NotFoundException, UnauthorizedException, ForbiddenException,
-    BadRequestException, ConflictException, InternalServerException, ServiceUnavailableException, ValidationException
+    BadRequestException,
+    BaseAPIException,
+    ConflictException,
+    ForbiddenException,
+    InternalServerException,
+    NotFoundException,
+    ServiceUnavailableException,
+    UnauthorizedException,
+    ValidationException,
 )
+
 
 def test_base_api_exception() -> None:
     exc = BaseAPIException(418, 'I am a teapot', 'TEAPOT')

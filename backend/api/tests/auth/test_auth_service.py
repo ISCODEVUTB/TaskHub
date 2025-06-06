@@ -1,10 +1,16 @@
-import pytest
-from unittest.mock import patch, MagicMock
-from api.auth_service.app.services.auth_service import AuthService
-from api.auth_service.app.schemas.user import UserRegisterDTO, UserProfileDTO
-from api.shared.exceptions.auth_exceptions import InvalidCredentialsException, InvalidTokenException
 from datetime import datetime, timezone
 from typing import Generator
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+from api.auth_service.app.schemas.user import UserProfileDTO, UserRegisterDTO
+from api.auth_service.app.services.auth_service import AuthService
+from api.shared.exceptions.auth_exceptions import (
+    InvalidCredentialsException,
+    InvalidTokenException,
+)
+
 
 # Este fixture se aplica automáticamente a todos los tests del archivo
 @pytest.fixture(autouse=True)

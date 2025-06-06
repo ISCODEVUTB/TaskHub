@@ -1,5 +1,7 @@
-from api.shared.models.notification import Notification, NotificationPreference
 from datetime import datetime
+
+from api.shared.models.notification import Notification, NotificationPreference
+
 
 def test_notification_model_instantiation() -> None:
     notif = Notification(

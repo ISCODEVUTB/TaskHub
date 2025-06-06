@@ -1,8 +1,11 @@
-import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
-from fastapi import Request, status
-from api.api_gateway.middleware.auth_middleware import auth_middleware
 from typing import Any
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+from fastapi import Request, status
+
+from api.api_gateway.middleware.auth_middleware import auth_middleware
+
 
 class DummyCallNext:
     def __init__(self, response: Any) -> None:

@@ -1,9 +1,16 @@
 import pytest
+
 from api.shared.exceptions.document_exceptions import (
-    DocumentNotFoundException, DocumentVersionNotFoundException, DocumentPermissionNotFoundException,
-    InsufficientDocumentPermissionException, DocumentStorageException, DocumentSizeLimitExceededException,
-    InvalidDocumentTypeException, DocumentLimitExceededException
+    DocumentLimitExceededException,
+    DocumentNotFoundException,
+    DocumentPermissionNotFoundException,
+    DocumentSizeLimitExceededException,
+    DocumentStorageException,
+    DocumentVersionNotFoundException,
+    InsufficientDocumentPermissionException,
+    InvalidDocumentTypeException,
 )
+
 
 def test_document_not_found() -> None:
     exc = DocumentNotFoundException()

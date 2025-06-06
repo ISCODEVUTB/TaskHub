@@ -1,8 +1,14 @@
-import pytest
-from unittest.mock import MagicMock, patch
-from api.document_service.app.decorators import document_decorators
-from api.shared.exceptions.document_exceptions import DocumentNotFoundException, InsufficientDocumentPermissionException
 from typing import Any
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+from api.document_service.app.decorators import document_decorators
+from api.shared.exceptions.document_exceptions import (
+    DocumentNotFoundException,
+    InsufficientDocumentPermissionException,
+)
+
 
 class DummyService:
     def __init__(self, db: Any) -> None:

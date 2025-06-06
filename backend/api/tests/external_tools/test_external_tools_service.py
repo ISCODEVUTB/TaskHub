@@ -1,7 +1,14 @@
-import pytest
 from unittest.mock import MagicMock, patch
-from api.external_tools_service.app.services.external_tools_service import ExternalToolsService
-from api.external_tools_service.app.schemas.external_tools import ExternalToolConnectionCreateDTO
+
+import pytest
+
+from api.external_tools_service.app.schemas.external_tools import (
+    ExternalToolConnectionCreateDTO,
+)
+from api.external_tools_service.app.services.external_tools_service import (
+    ExternalToolsService,
+)
+
 
 @pytest.fixture
 def mock_db() -> MagicMock:

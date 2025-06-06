@@ -1,7 +1,10 @@
-import requests
 import json
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
+
+import requests
+
 from api.shared.utils.supabase import SupabaseManager
+
 
 def get_metabase_card_data(card_id: int, session_token: str, metabase_url: str, supabase_bucket: Optional[str] = None, supabase_path: Optional[str] = None) -> Optional[Dict[str, Any]]:
     """

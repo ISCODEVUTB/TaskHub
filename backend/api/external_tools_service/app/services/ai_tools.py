@@ -1,8 +1,11 @@
-import os
-import requests
 import json
-from typing import Optional, Dict, Any
+import os
+from typing import Any, Dict, Optional
+
+import requests
+
 from api.shared.utils.supabase import SupabaseManager
+
 
 def query_huggingface(model: str, payload: Dict[str, Any], supabase_bucket: Optional[str] = None, supabase_path: Optional[str] = None) -> Optional[Dict[str, Any]]:
     """

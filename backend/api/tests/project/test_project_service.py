@@ -1,9 +1,20 @@
-import pytest
-from unittest.mock import MagicMock, patch
-from api.project_service.app.services.project_service import ProjectService
-from api.project_service.app.schemas.project import ProjectCreateDTO, ProjectUpdateDTO, ProjectMemberCreateDTO, ProjectMemberUpdateDTO
-from api.shared.exceptions.project_exceptions import ProjectNotFoundException, InsufficientProjectRoleException
 from datetime import datetime
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+from api.project_service.app.schemas.project import (
+    ProjectCreateDTO,
+    ProjectMemberCreateDTO,
+    ProjectMemberUpdateDTO,
+    ProjectUpdateDTO,
+)
+from api.project_service.app.services.project_service import ProjectService
+from api.shared.exceptions.project_exceptions import (
+    InsufficientProjectRoleException,
+    ProjectNotFoundException,
+)
+
 
 @pytest.fixture
 def mock_db():

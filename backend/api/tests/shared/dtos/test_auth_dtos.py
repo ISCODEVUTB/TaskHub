@@ -1,8 +1,15 @@
-import pytest
-from api.shared.dtos.auth_dtos import (
-    UserRegisterDTO, UserLoginDTO, TokenDTO, UserProfileDTO, RolePermissionDTO
-)
 from datetime import datetime
+
+import pytest
+
+from api.shared.dtos.auth_dtos import (
+    RolePermissionDTO,
+    TokenDTO,
+    UserLoginDTO,
+    UserProfileDTO,
+    UserRegisterDTO,
+)
+
 
 def test_user_register_dto_valid():
     dto = UserRegisterDTO(email='a@b.com', password='12345678', full_name='Name')

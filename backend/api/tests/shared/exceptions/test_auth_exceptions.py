@@ -1,8 +1,13 @@
 from api.shared.exceptions.auth_exceptions import (
-    InvalidCredentialsException, TokenExpiredException, InvalidTokenException,
-    EmailAlreadyExistsException, InsufficientPermissionsException,
-    AccountNotVerifiedException, AccountDisabledException
+    AccountDisabledException,
+    AccountNotVerifiedException,
+    EmailAlreadyExistsException,
+    InsufficientPermissionsException,
+    InvalidCredentialsException,
+    InvalidTokenException,
+    TokenExpiredException,
 )
+
 
 def test_invalid_credentials() -> None:
     exc = InvalidCredentialsException()

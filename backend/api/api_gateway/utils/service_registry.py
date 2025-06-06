@@ -1,8 +1,8 @@
 import os
 from typing import Any, Dict, List
 
-from dotenv import load_dotenv
 import requests
+from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()

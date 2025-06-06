@@ -1,7 +1,9 @@
 import pytest
+
 from api.document_service.app.factories.document_factory import DocumentFactory
 from api.document_service.app.schemas.document import DocumentType
 from api.shared.exceptions.document_exceptions import InvalidDocumentTypeException
+
 
 @pytest.fixture
 def factory() -> DocumentFactory:

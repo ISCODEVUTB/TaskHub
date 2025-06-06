@@ -1,7 +1,10 @@
 import os
-import requests
 from typing import Optional
+
+import requests
+
 from api.shared.utils.supabase import SupabaseManager
+
 
 def process_document_with_libreoffice(file_path: str, output_format: str = "pdf", supabase_bucket: Optional[str] = None, supabase_path: Optional[str] = None) -> Optional[str]:
     """

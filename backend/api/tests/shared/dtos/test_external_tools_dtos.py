@@ -1,9 +1,18 @@
 from datetime import datetime
+
 from pydantic import HttpUrl, TypeAdapter
+
 from api.shared.dtos.external_tools_dtos import (
-    ExternalToolType, OAuthProviderDTO, OAuthRequestDTO, OAuthCallbackDTO,
-    ExternalToolConnectionDTO, ExternalToolConnectionCreateDTO, ExternalResourceDTO, ExternalResourceSyncDTO
+    ExternalResourceDTO,
+    ExternalResourceSyncDTO,
+    ExternalToolConnectionCreateDTO,
+    ExternalToolConnectionDTO,
+    ExternalToolType,
+    OAuthCallbackDTO,
+    OAuthProviderDTO,
+    OAuthRequestDTO,
 )
+
 
 def test_external_tool_type_enum() -> None:
     assert ExternalToolType.GITHUB.value == 'github'
