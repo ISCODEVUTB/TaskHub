@@ -1,0 +1,76 @@
+name: Monorepo Tests & SonarCloud
+
+on:
+  push:
+    branches: [main, Development]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+
+jobs:
+  test-and-analyze:
+    name: Run Backend Tests & SonarCloud Analysis
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12']
+
+    steps:
+      - name: 🧾 Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: 🐍 Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: 📦 Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 2.0.0
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          cache: true  # ✅ cache correctamente manejado aquí
+
+      - name: ➕ Add Poetry to PATH manually (just in case)
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: 📦 Install dependencies with Poetry
+        working-directory: ./backend
+        run: |
+          poetry install --no-interaction --no-root
+
+      - name: 🧪 Run tests with coverage
+        working-directory: ./backend
+        env:
+          DATABASE_URL: "sqlite:///:memory:"
+          SUPABASE_URL: "https://bhpkrxaqmlnyoxmcxxth.supabase.co"
+          SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJocGtyeGFxbWxueW94bWN4eHRoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NjQ5MDgyMywiZXhwIjoyMDYyMDY2ODIzfQ.2YEnIAHTCiA3ksySifP4tqTZ2Aop4yNsUgqu2nA5Rug"
+          PYTHONPATH: .
+          METABASE_URL: "http://metabase:3000"
+          METABASE_TOKEN: "mb_QfCO9i3RIdsq7rBZ4Sjsf3di3rFJX4dzswCHVY7NIqc="
+          
+          
+        run: |
+          poetry run pytest api/tests --maxfail=1 --disable-warnings --cov=api --cov-report=term-missing --cov-report=xml
+
+      - name: 📄 Move coverage report to root
+        run: mv ./backend/coverage.xml ./coverage.xml
+
+      - name: 🔍 SonarCloud Analysis
+        uses: SonarSource/sonarcloud-github-action@v2
+        with:
+          projectBaseDir: .
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
