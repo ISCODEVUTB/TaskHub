@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import MagicMock, patch
 from api.document_service.app.services.document_service import DocumentService
-from api.document_service.app.schemas.document import DocumentCreateDTO, DocumentType, DocumentResponseDTO, DocumentPermissionCreateDTO, DocumentPermissionUpdateDTO, DocumentPermissionDTO, DocumentVersionDTO
+from api.document_service.app.schemas.document import DocumentCreateDTO, DocumentType, DocumentResponseDTO, DocumentPermissionDTO, DocumentVersionDTO
 from api.shared.exceptions.document_exceptions import DocumentNotFoundException, InsufficientDocumentPermissionException
 from datetime import datetime
 

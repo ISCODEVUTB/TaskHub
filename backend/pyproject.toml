@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "backend"
-version = "1.0.0"
+version = "0.1.0"
 description = "Backend default para proyectos orientados a microservicios"
 authors = ["Oyhs-co <oyhsotelo@gmail.com>"]
 readme = "README.md"

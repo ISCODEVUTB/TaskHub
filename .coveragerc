@@ -1,9 +1,0 @@
-[run]
-branch = True
-source = 
-    api
-
-[report]
-omit = 
-    */tests/*
-    */migrations/*
