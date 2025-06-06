@@ -82,4 +82,35 @@ class DocumentService {
       throw Exception('Failed to delete document');
     }
   }
+
+  Future<DocumentDTO> updateDocument({
+    required String documentId,
+    String? name,
+    String? parentId,
+    String? description,
+    List<String>? tags,
+    Map<String, dynamic>? metaData,
+  }) async {
+    final token = await storage.read(key: 'access_token');
+    final body = {
+      if (name != null) 'name': name,
+      if (parentId != null) 'parent_id': parentId,
+      if (description != null) 'description': description,
+      if (tags != null) 'tags': tags,
+      if (metaData != null) 'meta_data': metaData,
+    };
+    final response = await http.put(
+      Uri.parse('$baseUrl/documents/$documentId'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(body),
+    );
+    if (response.statusCode == 200) {
+      return DocumentDTO.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Failed to update document');
+    }
+  }
 } 

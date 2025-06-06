@@ -112,7 +112,27 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
               ? Center(child: Text('Error: $_error'))
               : _task == null
                   ? const Center(child: Text('Tarea no encontrada'))
-                  : _buildDetail(_task!),
+                  : Stack(
+                      children: [
+                        _buildDetail(_task!),
+                        Positioned(
+                          bottom: 24,
+                          right: 24,
+                          child: FloatingActionButton(
+                            onPressed: () {
+                              if (_task != null && widget.projectId != null) {
+                                context.go('/edit-task', extra: {
+                                  'task': _task!,
+                                  'projectId': widget.projectId!
+                                });
+                              }
+                            },
+                            child: const Icon(Icons.edit),
+                            tooltip: 'Editar tarea',
+                          ),
+                        ),
+                      ],
+                    ),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/colors.dart';
+import '../../auth/data/auth_service.dart';
 
 class UserEditScreen extends StatefulWidget {
   const UserEditScreen({super.key});
@@ -13,6 +14,8 @@ class _UserEditScreenState extends State<UserEditScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
+  bool _isLoading = false;
+  String? _error;
 
   @override
   void initState() {
@@ -29,19 +32,35 @@ class _UserEditScreenState extends State<UserEditScreen> {
     super.dispose();
   }
 
-  void _save() {
+  void _save() async {
     if (_formKey.currentState?.validate() ?? false) {
-      // Save logic here
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Perfil actualizado',
-            style: TextStyle(color: AppColors.textOnPrimary),
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+      try {
+        await AuthService().updateProfile(
+          displayName: _nameController.text,
+          email: _emailController.text,
+        );
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Perfil actualizado', style: TextStyle(color: AppColors.textOnPrimary)),
+            backgroundColor: AppColors.primary,
           ),
-          backgroundColor: AppColors.primary,
-        ),
-      );
-      context.pop();
+        );
+        context.pop();
+      } catch (e) {
+        setState(() {
+          _error = 'Error al actualizar perfil: '
+              '${e.toString().replaceAll('Exception:', '').trim()}';
+        });
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -98,7 +117,7 @@ class _UserEditScreenState extends State<UserEditScreen> {
             ),
             const SizedBox(height: 32),
             ElevatedButton.icon(
-              onPressed: _save,
+              onPressed: _isLoading ? null : _save,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 padding: const EdgeInsets.symmetric(vertical: 14),
@@ -109,6 +128,10 @@ class _UserEditScreenState extends State<UserEditScreen> {
               icon: const Icon(Icons.save),
               label: const Text('Guardar cambios'),
             ),
+            if (_error != null) ...[
+              const SizedBox(height: 12),
+              Text(_error!, style: const TextStyle(color: Colors.red)),
+            ],
           ],
         ),
       ),

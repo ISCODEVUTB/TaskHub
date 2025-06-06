@@ -120,25 +120,21 @@ class AuthService extends ChangeNotifier {
   }
 
   // Update user profile
-  Future<void> updateProfile({String? displayName, String? photoURL}) async {
-    if (_currentUser == null) {
-      throw Exception('No user is logged in');
-    }
-
-    try {
-      // Simulate API call
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      _currentUser = User(
-        uid: _currentUser!.uid,
-        email: _currentUser!.email,
-        displayName: displayName ?? _currentUser!.displayName,
-        photoURL: photoURL ?? _currentUser!.photoURL,
-      );
-
-      notifyListeners();
-    } catch (e) {
-      rethrow;
+  Future<void> updateProfile({String? displayName, String? email}) async {
+    final token = await storage.read(key: 'access_token');
+    final response = await http.put(
+      Uri.parse('$baseUrl/auth/profile'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        if (displayName != null) 'full_name': displayName,
+        if (email != null) 'email': email,
+      }),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Error al actualizar perfil');
     }
   }
 

@@ -97,7 +97,24 @@ class _DocumentDetailScreenState extends State<DocumentDetailScreen> {
               ? Center(child: Text('Error: $_error'))
               : _document == null
                   ? const Center(child: Text('Documento no encontrado'))
-                  : _buildDetail(_document!),
+                  : Stack(
+                      children: [
+                        _buildDetail(_document!),
+                        Positioned(
+                          bottom: 24,
+                          right: 24,
+                          child: FloatingActionButton(
+                            onPressed: () {
+                              if (_document != null) {
+                                context.go('/edit-document', extra: _document!);
+                              }
+                            },
+                            child: const Icon(Icons.edit),
+                            tooltip: 'Editar documento',
+                          ),
+                        ),
+                      ],
+                    ),
     );
   }
 } 

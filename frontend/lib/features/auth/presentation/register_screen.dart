@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/widgets/custom_textfield.dart';
 import '../../../core/widgets/primary_button.dart';
+import '../../auth/data/auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -17,13 +18,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _confirmPasswordController = TextEditingController();
   String? _error;
 
-  void _register() {
+  void _register() async {
     setState(() => _error = null);
     if (_passwordController.text != _confirmPasswordController.text) {
       setState(() => _error = 'Las contraseñas no coinciden');
       return;
     }
-    context.go('/home');
+    try {
+      await AuthService().register(
+        _emailController.text,
+        _passwordController.text,
+        _nameController.text,
+        '', // Puedes pedir companyName si lo necesitas
+      );
+      if (!mounted) return;
+      context.go('/dashboard');
+    } catch (e) {
+      setState(() => _error = 'Error al registrar: '
+          '${e.toString().replaceAll('Exception:', '').trim()}');
+    }
   }
 
   @override

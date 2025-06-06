@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/strings.dart';
 import '../../../core/constants/colors.dart';
+import '../data/project_service.dart';
 
 class ProjectEditScreen extends StatefulWidget {
   final String? projectId;
@@ -18,6 +19,8 @@ class _ProjectEditScreenState extends State<ProjectEditScreen> {
   late TextEditingController _startDateController;
   late TextEditingController _endDateController;
   late TextEditingController _membersController;
+  bool _isLoading = false;
+  String? _error;
 
   @override
   void initState() {
@@ -46,19 +49,38 @@ class _ProjectEditScreenState extends State<ProjectEditScreen> {
     super.dispose();
   }
 
-  void _save() {
+  void _save() async {
     if (_formKey.currentState?.validate() ?? false) {
-      // Save logic here
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            AppStrings.success,
-            style: TextStyle(color: AppColors.textOnPrimary),
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+      try {
+        await ProjectService().updateProject(
+          projectId: widget.projectId!,
+          name: _nameController.text,
+          description: _descriptionController.text,
+          startDate: DateTime.tryParse(_startDateController.text),
+          endDate: DateTime.tryParse(_endDateController.text),
+        );
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Proyecto actualizado', style: TextStyle(color: AppColors.textOnPrimary)),
+            backgroundColor: AppColors.primary,
           ),
-          backgroundColor: AppColors.primary,
-        ),
-      );
-      context.pop();
+        );
+        context.pop();
+      } catch (e) {
+        setState(() {
+          _error = 'Error al actualizar proyecto: '
+              '${e.toString().replaceAll('Exception:', '').trim()}';
+        });
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -189,7 +211,7 @@ class _ProjectEditScreenState extends State<ProjectEditScreen> {
               ),
               const SizedBox(height: 24),
               ElevatedButton.icon(
-                onPressed: () {
+                onPressed: _isLoading ? null : () {
                   Feedback.forTap(context);
                   _save();
                 },
@@ -203,6 +225,10 @@ class _ProjectEditScreenState extends State<ProjectEditScreen> {
                 icon: const Icon(Icons.save),
                 label: const Text('Guardar cambios'),
               ),
+              if (_error != null) ...[
+                const SizedBox(height: 12),
+                Text(_error!, style: const TextStyle(color: Colors.red)),
+              ],
             ],
           ),
         ),

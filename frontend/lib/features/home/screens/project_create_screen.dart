@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/widgets/navigation_utils.dart';
+import '../data/project_service.dart';
 
 class CreateProjectPage extends StatefulWidget {
   const CreateProjectPage({super.key});
@@ -17,6 +18,8 @@ class _CreateProjectPageState extends State<CreateProjectPage> {
   final _startDateController = TextEditingController();
   final _endDateController = TextEditingController();
   final _membersController = TextEditingController();
+  bool _isLoading = false;
+  String? _error;
 
   @override
   void dispose() {
@@ -28,15 +31,35 @@ class _CreateProjectPageState extends State<CreateProjectPage> {
     super.dispose();
   }
 
-  void _submitForm() {
+  void _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      // ignore: unused_local_variable
-      final projectName = _projectNameController.text;
-      // Lógica para crear el proyecto
-      context.pop();
-
-      // Si necesitas pasar datos de vuelta a la pantalla anterior:
-      // context.pop({'name': projectName});
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+      try {
+        final name = _projectNameController.text;
+        final description = _descriptionController.text.isNotEmpty ? _descriptionController.text : null;
+        final startDate = _startDateController.text.isNotEmpty ? DateTime.parse(_startDateController.text) : null;
+        final endDate = _endDateController.text.isNotEmpty ? DateTime.parse(_endDateController.text) : null;
+        await ProjectService().createProject(
+          name: name,
+          description: description,
+          startDate: startDate,
+          endDate: endDate,
+        );
+        if (!mounted) return;
+        context.pop();
+      } catch (e) {
+        setState(() {
+          _error = 'Error al crear proyecto: '
+              '${e.toString().replaceAll('Exception:', '').trim()}';
+        });
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -180,7 +203,7 @@ class _CreateProjectPageState extends State<CreateProjectPage> {
               ),
               const SizedBox(height: 24),
               ElevatedButton.icon(
-                onPressed: () {
+                onPressed: _isLoading ? null : () {
                   Feedback.forTap(context);
                   _submitForm();
                 },
@@ -194,6 +217,10 @@ class _CreateProjectPageState extends State<CreateProjectPage> {
                 icon: const Icon(Icons.save),
                 label: const Text('Crear proyecto'),
               ),
+              if (_error != null) ...[
+                const SizedBox(height: 12),
+                Text(_error!, style: const TextStyle(color: Colors.red)),
+              ],
             ],
           ),
         ),

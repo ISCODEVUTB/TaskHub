@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/widgets/custom_textfield.dart';
 import '../../../core/widgets/primary_button.dart';
+import '../../auth/data/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,18 +18,22 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _error;
 
   void _login() async {
-    setState(() => _isLoading = true);
-    // Simulación de login. Aquí va llamada a AuthService
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() => _isLoading = false);
-
-    if (_emailController.text == 'admin@taskhub.com' &&
-        _passwordController.text == '123456') {
-      // Redirigir a Home usando go_router
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+    try {
+      await AuthService().login(
+        _emailController.text,
+        _passwordController.text,
+      );
       if (!mounted) return;
-      context.go('/home');
-    } else {
-      setState(() => _error = 'Credenciales incorrectas');
+      context.go('/dashboard');
+    } catch (e) {
+      setState(() => _error = 'Error de autenticación: '
+          '${e.toString().replaceAll('Exception:', '').trim()}');
+    } finally {
+      setState(() => _isLoading = false);
     }
   }
 
