@@ -25,3 +25,4 @@ __pycache__/
 *.sublime-workspace
 *.sublime-project
 .vscode/
+.pytest_cache/
