@@ -1,15 +1,16 @@
+version: '3.8'
 
 services:
   # API Gateway
   api_gateway:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
     command: python -m uvicorn api.api_gateway.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir /app/api/api_gateway
     ports:
       - "8000:8000"
     env_file:
-      - .env
+      - ./backend/.env
     environment:
       - AUTH_SERVICE_URL=http://auth_service:8001
       - PROJECT_SERVICE_URL=http://project_service:8002
@@ -31,18 +32,18 @@ services:
       - taskhub-network
     restart: unless-stopped
     volumes:
-      - ./api:/app/api
+      - ./backend/api:/app/api
 
   # Auth Service
   auth_service:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
     command: python -m uvicorn api.auth_service.app.main:app --host 0.0.0.0 --port 8001 --reload --reload-dir /app/api/auth_service/app
     ports:
       - "8001:8001"
     env_file:
-      - .env
+      - ./backend/.env
     environment:
       - DATABASE_URL=postgresql://postgres:Adminqwert1234db@db.bhpkrxaqmlnyoxmcxxth.supabase.co:5432/postgres
       - JWT_ALGORITHM=HS256
@@ -55,18 +56,18 @@ services:
       - taskhub-network
     restart: unless-stopped
     volumes:
-      - ./api:/app/api
+      - ./backend/api:/app/api
 
   # Project Service
   project_service:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
     command: python -m uvicorn api.project_service.app.main:app --host 0.0.0.0 --port 8002 --reload --reload-dir /app/api/project_service/app
     ports:
       - "8002:8002"
     env_file:
-      - .env
+      - ./backend/.env
     environment:
       - DATABASE_URL=postgresql://postgres:Adminqwert1234db@db.bhpkrxaqmlnyoxmcxxth.supabase.co:5432/postgres
       - JWT_ALGORITHM=HS256
@@ -81,18 +82,18 @@ services:
       - taskhub-network
     restart: unless-stopped
     volumes:
-      - ./api:/app/api
+      - ./backend/api:/app/api
 
   # Document Service
   document_service:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
     command: python -m uvicorn api.document_service.app.main:app --host 0.0.0.0 --port 8003 --reload --reload-dir /app/api/document_service/app
     ports:
       - "8003:8003"
     env_file:
-      - .env
+      - ./backend/.env
     environment:
       - DATABASE_URL=postgresql://postgres:Adminqwert1234db@db.bhpkrxaqmlnyoxmcxxth.supabase.co:5432/postgres
       - JWT_ALGORITHM=HS256
@@ -107,18 +108,18 @@ services:
       - taskhub-network
     restart: unless-stopped
     volumes:
-      - ./api:/app/api
+      - ./backend/api:/app/api
 
   # Notification Service
   notification_service:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
     command: python -m uvicorn api.notification_service.app.main:app --host 0.0.0.0 --port 8004 --reload --reload-dir /app/api/notification_service/app
     ports:
       - "8004:8004"
     env_file:
-      - .env
+      - ./backend/.env
     environment:
       - DATABASE_URL=postgresql://postgres:Adminqwert1234db@db.bhpkrxaqmlnyoxmcxxth.supabase.co:5432/postgres
       - JWT_ALGORITHM=HS256
@@ -133,18 +134,18 @@ services:
       - taskhub-network
     restart: unless-stopped
     volumes:
-      - ./api:/app/api
+      - ./backend/api:/app/api
 
   # External Tools Service
   external_tools_service:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
     command: python -m uvicorn api.external_tools_service.app.main:app --host 0.0.0.0 --port 8005 --reload --reload-dir /app/api/external_tools_service/app
     ports:
       - "8005:8005"
     env_file:
-      - .env
+      - ./backend/.env
     environment:
       - DATABASE_URL=postgresql://postgres:Adminqwert1234db@db.bhpkrxaqmlnyoxmcxxth.supabase.co:5432/postgres
       - JWT_ALGORITHM=HS256
@@ -159,7 +160,7 @@ services:
       - taskhub-network
     restart: unless-stopped
     volumes:
-      - ./api:/app/api
+      - ./backend/api:/app/api
 
   # RabbitMQ
   rabbitmq:
@@ -223,9 +224,11 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "8080:80"
+      - "8081:80"
     depends_on:
       - api_gateway
+    networks:
+      - taskhub-network
 
 networks:
   taskhub-network:

@@ -24,6 +24,8 @@ import '../features/home/screens/change_password_screen.dart';
 import '../features/home/screens/user_edit_screen.dart';
 import '../core/constants/colors.dart';
 import '../core/constants/strings.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../features/auth/data/auth_service.dart';
 
 // Shell to provide persistent navigation
 class MainShell extends StatefulWidget {
@@ -173,6 +175,26 @@ class _MainShellState extends State<MainShell> {
 class AppRouter {
   static final GoRouter router = GoRouter(
     initialLocation: '/login',
+    redirect: (context, state) async {
+      // Permitir acceso libre a login y register
+      if (state.matchedLocation == '/login' || state.matchedLocation == '/register') {
+        return null;
+      }
+      final storage = const FlutterSecureStorage();
+      final token = await storage.read(key: 'access_token');
+      if (token == null) {
+        return '/login';
+      }
+      // Verificar perfil (opcional: puedes cachear el resultado)
+      try {
+        final profile = await AuthService().getProfile();
+        // Si quieres forzar verificación, puedes chequear un campo aquí
+        // if (!profile.isVerified) return '/login';
+        return null;
+      } catch (_) {
+        return '/login';
+      }
+    },
     routes: [
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
@@ -204,12 +226,12 @@ class AppRouter {
           ),
           GoRoute(
             path: '/notifications',
-            builder: (context, state) => const NotificationsPage(),
+            builder: (context, state) => const NotificationsScreen(),
           ),
           GoRoute(
             path: '/notification-settings',
             pageBuilder: (context, state) => CustomTransitionPage(
-              child: const NotificationPreferencesPage(),
+              child: const NotificationsPreferencesScreen(),
               transitionsBuilder: (context, animation, secondaryAnimation, child) =>
                 FadeTransition(opacity: animation, child: child),
             ),
@@ -232,7 +254,7 @@ class AppRouter {
           ),
           GoRoute(
             path: '/tools',
-            builder: (context, state) => const ExternalToolsPage(),
+            builder: (context, state) => const ExternalToolsScreen(),
           ),
           GoRoute(
             path: '/tool/calendario',

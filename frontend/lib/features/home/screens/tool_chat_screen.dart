@@ -8,40 +8,28 @@ class ToolChatScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Chat de herramientas'),
+        title: const Text('Chat externo'),
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
         elevation: 2,
+        toolbarHeight: 48,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(bottom: Radius.circular(18)),
         ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          tooltip: 'Regresar',
+          onPressed: () {
+            Feedback.forTap(context);
+            Navigator.of(context).pop();
+          },
+        ),
       ),
-      body: Center(
-        child: Card(
-          elevation: 4,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(32.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.chat, size: 48, color: AppColors.primary),
-                const SizedBox(height: 16),
-                Text(
-                  'Aquí irá el chat de herramientas',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Próximamente podrás interactuar con herramientas externas desde aquí.',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
-            ),
-          ),
+      body: const Center(
+        child: Text(
+          'La integración de chat externo aún no está implementada.',
+          style: TextStyle(fontSize: 18, color: Colors.grey),
+          textAlign: TextAlign.center,
         ),
       ),
     );

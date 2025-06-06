@@ -22,7 +22,6 @@ RUN pip install --no-cache-dir wheel && \
 
 # Copia el resto del código
 COPY ./api ./api
-COPY ./sources ./sources
 
 # Elimina archivos pyc y cachés innecesarios
 RUN find /app -type d -name __pycache__ -exec rm -rf {} + && \

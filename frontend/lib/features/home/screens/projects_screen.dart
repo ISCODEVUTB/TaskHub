@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/colors.dart';
+import '../data/project_service.dart';
+import '../data/project_models.dart';
 import '../../../core/widgets/section_card.dart';
 
 class ProjectsPage extends StatefulWidget {
@@ -13,6 +15,36 @@ class ProjectsPage extends StatefulWidget {
 class _ProjectsPageState extends State<ProjectsPage> {
   final TextEditingController _searchController = TextEditingController();
   String _search = '';
+  final ProjectService _service = ProjectService();
+
+  List<ProjectDTO> _projects = [];
+  bool _loading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProjects();
+  }
+
+  Future<void> _loadProjects() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final projects = await _service.getProjects();
+      setState(() {
+        _projects = projects;
+        _loading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = 'Error al cargar proyectos: $e';
+        _loading = false;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -22,11 +54,10 @@ class _ProjectsPageState extends State<ProjectsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final projects = List.generate(5, (index) => 'Proyecto ${index + 1}');
-    final filteredProjects =
-        projects
-            .where((p) => p.toLowerCase().contains(_search.toLowerCase()))
-            .toList();
+    final filteredProjects = _projects
+        .where((p) => p.name.toLowerCase().contains(_search.toLowerCase()))
+        .toList();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Proyectos'),
@@ -44,72 +75,76 @@ class _ProjectsPageState extends State<ProjectsPage> {
               )
             : null,
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Buscar proyecto...',
-                prefixIcon: const Icon(Icons.search, color: AppColors.primary),
-                filled: true,
-                fillColor: Theme.of(context).inputDecorationTheme.fillColor ?? Theme.of(context).cardColor,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  vertical: 0,
-                  horizontal: 16,
-                ),
-              ),
-              onChanged: (value) => setState(() => _search = value),
-            ),
-          ),
-          Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.all(24),
-              itemCount: filteredProjects.length,
-              separatorBuilder:
-                  (context, index) =>
-                      Divider(height: 24, color: Theme.of(context).dividerColor),
-              itemBuilder: (context, index) {
-                final projectId = (index + 1).toString();
-                return Card(
-                  elevation: 4,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: AppColors.primary.withAlpha(38),
-                      child: Icon(Icons.folder, color: AppColors.primary),
-                    ),
-                    title: Text(
-                      filteredProjects[index],
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : _error != null
+              ? Center(child: Text(_error!, style: const TextStyle(color: Colors.red)))
+              : Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: TextField(
+                        controller: _searchController,
+                        decoration: InputDecoration(
+                          hintText: 'Buscar proyecto...',
+                          prefixIcon: const Icon(Icons.search, color: AppColors.primary),
+                          filled: true,
+                          fillColor: Theme.of(context).inputDecorationTheme.fillColor ?? Theme.of(context).cardColor,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 0,
+                            horizontal: 16,
+                          ),
+                        ),
+                        onChanged: (value) => setState(() => _search = value),
                       ),
                     ),
-                    subtitle: Text(
-                      'Creado el ${DateTime.now().toLocal().toIso8601String().substring(0, 10)}',
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodySmall,
+                    Expanded(
+                      child: RefreshIndicator(
+                        onRefresh: _loadProjects,
+                        child: ListView.separated(
+                          padding: const EdgeInsets.all(24),
+                          itemCount: filteredProjects.length,
+                          separatorBuilder: (context, index) =>
+                              Divider(height: 24, color: Theme.of(context).dividerColor),
+                          itemBuilder: (context, index) {
+                            final project = filteredProjects[index];
+                            return Card(
+                              elevation: 4,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: ListTile(
+                                leading: CircleAvatar(
+                                  backgroundColor: AppColors.primary.withAlpha(38),
+                                  child: Icon(Icons.folder, color: AppColors.primary),
+                                ),
+                                title: Text(
+                                  project.name,
+                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                ),
+                                subtitle: Text(
+                                  'Creado el ${project.createdAt.toLocal().toIso8601String().substring(0, 10)}',
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                                trailing: StatusBadge(status: project.status),
+                                onTap: () {
+                                  Feedback.forTap(context);
+                                  context.go('/project/${project.id}');
+                                },
+                              ),
+                            );
+                          },
+                        ),
+                      ),
                     ),
-                    trailing: StatusBadge(status: 'En progreso'),
-                    onTap: () {
-                      Feedback.forTap(context);
-                      context.go('/project/$projectId');
-                    },
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
+                  ],
+                ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.go('/create-project'),
         child: const Icon(Icons.add),

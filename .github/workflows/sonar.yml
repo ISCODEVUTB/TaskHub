@@ -14,13 +14,13 @@ on:
 
 jobs:
   test-and-analyze:
-    name: Run Tests & SonarCloud Analysis
+    name: Run Backend Tests & SonarCloud Analysis
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.13']
+        python-version: ['3.12']
 
     steps:
       - name: 🧾 Checkout code
@@ -40,22 +40,19 @@ jobs:
           pip install poetry
 
       - name: 📦 Install dependencies with Poetry
-        working-directory: ./backend/api
+        working-directory: ./backend
         run: |
           poetry install --no-interaction --no-root
 
       - name: Run tests with coverage
-        shell: bash
+        working-directory: ./backend
+        env:
+          DATABASE_URL: "sqlite:///:memory:"
         run: |
-          if [[ "$RUNNER_OS" == "Windows" ]]; then
-            export PYTHONPATH=backend/api
-            poetry run pytest backend/api/tests --maxfail=1 --disable-warnings --cov=backend/api --cov-report=term-missing --cov-report=xml
-          else
-            PYTHONPATH=backend/api poetry run pytest backend/api/tests --maxfail=1 --disable-warnings --cov=backend/api --cov-report=term-missing --cov-report=xml
-          fi
+          poetry run pytest api/tests --maxfail=1 --disable-warnings --cov=api --cov-report=term-missing --cov-report=xml
 
       - name: 📄 Move coverage report to root
-        run: mv ./backend/api/coverage.xml ./coverage.xml
+        run: mv ./backend/coverage.xml ./coverage.xml
 
       - name: 🔍 SonarCloud Analysis
         uses: SonarSource/sonarcloud-github-action@v2

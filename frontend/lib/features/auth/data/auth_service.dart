@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'auth_models.dart';
 import 'package:flutter/foundation.dart';
 
 // Simple User model
@@ -13,6 +17,9 @@ class User {
 // This is a simplified auth service. In a real app, you would integrate
 // with Firebase Auth, your own backend, or another auth provider.
 class AuthService extends ChangeNotifier {
+  static const String baseUrl = 'http://localhost:8000'; // Cambia por tu IP real
+  final storage = const FlutterSecureStorage();
+
   User? _currentUser;
 
   User? get currentUser => _currentUser;
@@ -132,6 +139,54 @@ class AuthService extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       rethrow;
+    }
+  }
+
+  Future<TokenDTO> login(String email, String password) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/auth/login'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email, 'password': password}),
+    );
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      await storage.write(key: 'access_token', value: data['access_token']);
+      return TokenDTO.fromJson(data);
+    } else {
+      throw Exception('Login failed');
+    }
+  }
+
+  Future<TokenDTO> register(String email, String password, String fullName, String companyName) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/auth/register'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email': email,
+        'password': password,
+        'full_name': fullName,
+        'company_name': companyName,
+      }),
+    );
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      await storage.write(key: 'access_token', value: data['access_token']);
+      return TokenDTO.fromJson(data);
+    } else {
+      throw Exception('Register failed');
+    }
+  }
+
+  Future<UserProfileDTO> getProfile() async {
+    final token = await storage.read(key: 'access_token');
+    final response = await http.get(
+      Uri.parse('$baseUrl/auth/profile'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (response.statusCode == 200) {
+      return UserProfileDTO.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Profile fetch failed');
     }
   }
 }

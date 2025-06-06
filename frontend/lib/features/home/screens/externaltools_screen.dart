@@ -1,28 +1,57 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/strings.dart';
+import '../../home/data/external_tools_service.dart';
+import '../../home/data/external_tools_models.dart';
 import '../../../core/constants/colors.dart';
-import 'package:go_router/go_router.dart';
 
-class ExternalToolsPage extends StatelessWidget {
-  const ExternalToolsPage({super.key});
+class ExternalToolsScreen extends StatefulWidget {
+  const ExternalToolsScreen({super.key});
 
-  final List<Map<String, dynamic>> tools = const [
-    {
-      'name': 'Calendario',
-      'icon': Icons.calendar_today,
-      'description': 'Gestiona tus fechas importantes y eventos',
-    },
-    {
-      'name': 'Chat',
-      'icon': Icons.chat_bubble,
-      'description': 'Comunícate con tu equipo en tiempo real',
-    },
-    {
-      'name': 'Analytics',
-      'icon': Icons.analytics,
-      'description': 'Visualiza estadísticas y rendimiento',
-    },
-  ];
+  @override
+  State<ExternalToolsScreen> createState() => _ExternalToolsScreenState();
+}
+
+class _ExternalToolsScreenState extends State<ExternalToolsScreen> {
+  List<ExternalToolConnectionDTO> _connections = [];
+  bool _loading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchConnections();
+  }
+
+  Future<void> _fetchConnections() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final conns = await ExternalToolsService().getUserConnections();
+      setState(() {
+        _connections = conns;
+      });
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+      });
+    } finally {
+      setState(() {
+        _loading = false;
+      });
+    }
+  }
+
+  Future<void> _disconnect(String connectionId) async {
+    try {
+      await ExternalToolsService().deleteConnection(connectionId);
+      await _fetchConnections();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al desconectar: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +61,7 @@ class ExternalToolsPage extends StatelessWidget {
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
         elevation: 2,
+        toolbarHeight: 48,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(bottom: Radius.circular(18)),
         ),
@@ -40,55 +70,91 @@ class ExternalToolsPage extends StatelessWidget {
           tooltip: 'Regresar',
           onPressed: () {
             Feedback.forTap(context);
-            context.pop();
+            Navigator.of(context).pop();
           },
         ),
       ),
-      body: ListView.separated(
-        padding: const EdgeInsets.all(24.0),
-        itemCount: 3,
-        separatorBuilder:
-            (context, index) => Divider(height: 24, color: Theme.of(context).dividerColor),
-        itemBuilder: (context, index) {
-          final icons = [Icons.calendar_today, Icons.chat_bubble, Icons.analytics];
-          final titles = ['Calendario', 'Chat', 'Análisis de datos'];
-          final routes = ['/tool/calendario', '/tool/chat', '/tool/analytics'];
-          final descriptions = [
-            'Gestiona tus fechas importantes y eventos',
-            'Comunícate con tu equipo en tiempo real',
-            'Visualiza estadísticas y rendimiento',
-          ];
-          return Card(
-            elevation: 4,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(18),
-            ),
-            color: Theme.of(context).cardColor,
-            child: ListTile(
-              leading: CircleAvatar(
-                backgroundColor: AppColors.info.withAlpha(38),
-                child: Icon(icons[index], color: AppColors.info, size: 32),
-                radius: 28,
-              ),
-              title: Text(
-                titles[index],
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 20),
-              ),
-              subtitle: Text(
-                descriptions[index],
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 15),
-              ),
-              trailing: Icon(Icons.chevron_right, color: Theme.of(context).iconTheme.color, size: 28),
-              onTap: () {
-                Feedback.forTap(context);
-                context.go(routes[index]);
-              },
-              contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
-              minVerticalPadding: 18,
-            ),
-          );
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : _error != null
+              ? Center(child: Text('Error: $_error'))
+              : _connections.isEmpty
+                  ? const Center(child: Text('No hay conexiones'))
+                  : ListView.separated(
+                      padding: const EdgeInsets.all(24.0),
+                      itemCount: _connections.length,
+                      separatorBuilder: (context, index) => Divider(height: 24, color: Theme.of(context).dividerColor),
+                      itemBuilder: (context, index) {
+                        final conn = _connections[index];
+                        return Card(
+                          elevation: 2,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: AppColors.secondary.withAlpha(38),
+                              child: Icon(
+                                _iconForProvider(conn.providerType),
+                                color: AppColors.secondary,
+                              ),
+                            ),
+                            title: Text(
+                              conn.accountName ?? conn.providerType,
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Proveedor: ${conn.providerType}'),
+                                if (conn.accountEmail != null) Text('Email: ${conn.accountEmail}'),
+                                if (conn.isActive) const Text('Estado: Activa', style: TextStyle(color: Colors.green)),
+                                if (!conn.isActive) const Text('Estado: Inactiva', style: TextStyle(color: Colors.red)),
+                                if (conn.expiresAt != null) Text('Expira: ${conn.expiresAt}'),
+                                if (conn.lastUsedAt != null) Text('Último uso: ${conn.lastUsedAt}'),
+                              ],
+                            ),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.link_off, color: AppColors.primary),
+                              tooltip: 'Desconectar',
+                              onPressed: () => _disconnect(conn.id),
+                            ),
+                            onTap: () {
+                              // Acción al tocar la conexión (por ejemplo, ver recursos externos)
+                            },
+                          ),
+                        );
+                      },
+                    ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Acción para conectar nueva herramienta externa
+          // Por ejemplo: Navigator.of(context).pushNamed('/externaltools/connect');
         },
+        tooltip: 'Conectar herramienta',
+        child: const Icon(Icons.add_link),
       ),
     );
+  }
+
+  IconData _iconForProvider(String providerType) {
+    switch (providerType) {
+      case 'github':
+        return Icons.code;
+      case 'google_drive':
+        return Icons.cloud;
+      case 'dropbox':
+        return Icons.cloud_upload;
+      case 'onedrive':
+        return Icons.cloud_done;
+      case 'slack':
+        return Icons.chat;
+      case 'jira':
+        return Icons.bug_report;
+      case 'trello':
+        return Icons.view_kanban;
+      default:
+        return Icons.extension;
+    }
   }
 }
