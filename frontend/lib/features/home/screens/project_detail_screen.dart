@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../data/project_service.dart';
 import '../data/project_models.dart';
+import '../data/document_service.dart';
+import '../data/document_models.dart';
+import './document_detail_screen.dart'; // Added import
 import 'task_detail_screen.dart';
 import '../../../core/widgets/section_card.dart';
 import '../../../core/widgets/navigation_utils.dart';
@@ -19,11 +22,15 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final ProjectService _service = ProjectService();
+  final DocumentService _documentService = DocumentService(); // Added
 
   ProjectDTO? _project;
   List<ProjectMemberDTO> _members = [];
   List<TaskDTO> _tasks = [];
   List<ActivityDTO> _activities = [];
+  List<DocumentDTO> _projectDocuments = []; // Added
+  bool _projectDocumentsLoading = true;   // Added
+  String? _projectDocumentsError;         // Added
   bool _isLoading = true;
   String? _error;
 
@@ -44,18 +51,51 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
       final members = await _service.getProjectMembers(widget.projectId!);
       final tasks = await _service.getProjectTasks(widget.projectId!);
       final activities = await _service.getProjectActivities(widget.projectId!);
+      await _fetchProjectDocuments(); // Call to fetch documents
       setState(() {
         _project = project;
         _members = members;
         _tasks = tasks;
         _activities = activities;
-        _isLoading = false;
+        _isLoading = false; // Overall loading for project details
       });
     } catch (e) {
       setState(() {
-        _error = 'Error al cargar datos: $e';
+        _error = 'Error al cargar datos del proyecto: $e';
         _isLoading = false;
       });
+    }
+  }
+
+  Future<void> _fetchProjectDocuments() async {
+    if (widget.projectId == null) return;
+    // Document loading state is managed by _projectDocumentsLoading
+    // No need to set _isLoading here as it's for the main project data.
+    // If _loadAll sets _isLoading to true, this will run concurrently or sequentially.
+    // For clarity, let's manage its own loading state and not interfere with _isLoading for the whole page.
+    setState(() {
+      _projectDocumentsLoading = true;
+      _projectDocumentsError = null;
+    });
+    try {
+      final docs = await _documentService.getProjectDocuments(widget.projectId!);
+      if (mounted) {
+        setState(() {
+          _projectDocuments = docs;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _projectDocumentsError = 'Error al cargar documentos: ${e.toString()}';
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _projectDocumentsLoading = false;
+        });
+      }
     }
   }
 
@@ -120,7 +160,7 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                   children: [
                     _buildSummaryTab(),
                     _buildTasksTab(),
-                    Center(child: Text('Aquí puedes integrar documentos')), // Puedes usar DocumentService aquí
+                    _buildDocumentsTab(), // Updated
                     _buildActivityTab(),
                   ],
                 ),
@@ -285,24 +325,37 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
                 child: const Text('Cancelar'),
               ),
               TextButton(
-                onPressed: () {
-                  // Cerrar el diálogo
-                  Navigator.of(context).pop();
+                onPressed: () async {
+                  Navigator.of(context).pop(); // Close the dialog first
 
-                  // Simular eliminación
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: const Text(
-                        'Proyecto eliminado correctamente',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      backgroundColor: Colors.black.withAlpha(242),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
+                  if (widget.projectId == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Error: ID de proyecto no disponible.')),
+                    );
+                    return;
+                  }
 
-                  // Volver a la pantalla anterior
-                  Navigator.of(context).pop();
+                  setState(() => _isLoading = true);
+                  try {
+                    await _service.deleteProject(widget.projectId!);
+
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Proyecto eliminado correctamente')),
+                      );
+                      context.pop(); // Navigate back
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error al eliminar proyecto: $e')),
+                      );
+                    }
+                  } finally {
+                    if (mounted) {
+                      setState(() => _isLoading = false);
+                    }
+                  }
                 },
                 child: const Text(
                   'Eliminar',
@@ -311,6 +364,58 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
               ),
             ],
           ),
+    );
+  }
+
+  Widget _buildDocumentsTab() {
+    if (_projectDocumentsLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_projectDocumentsError != null) {
+      return Center(child: Text(_projectDocumentsError!, style: const TextStyle(color: Colors.red)));
+    }
+    if (_projectDocuments.isEmpty) {
+      return const Center(child: Text('No hay documentos en este proyecto.'));
+    }
+    return ListView.builder(
+      padding: const EdgeInsets.all(16.0),
+      itemCount: _projectDocuments.length,
+      itemBuilder: (context, index) {
+        final doc = _projectDocuments[index];
+        IconData docIcon;
+        switch (doc.type) {
+          case DocumentType.FOLDER:
+            docIcon = Icons.folder;
+            break;
+          case DocumentType.LINK:
+            docIcon = Icons.link;
+            break;
+          case DocumentType.FILE:
+          default:
+            docIcon = Icons.insert_drive_file;
+            break;
+        }
+        return Card(
+          elevation: 2,
+          margin: const EdgeInsets.symmetric(vertical: 6),
+          child: ListTile(
+            leading: Icon(docIcon, color: AppColors.primary, size: 30),
+            title: Text(doc.name, style: const TextStyle(fontWeight: FontWeight.w500)),
+            subtitle: Text(doc.description ?? 'Tipo: ${doc.type.toString().split('.').last} - ${doc.createdAt.toLocal().toString().substring(0,16)}'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              if (widget.projectId != null) {
+                context.push('/project/${widget.projectId}/document/${doc.id}');
+              } else {
+                // Handle case where projectId is null, though it shouldn't be at this point
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Error: Project ID no disponible.')),
+                );
+              }
+            },
+          ),
+        );
+      },
     );
   }
 }

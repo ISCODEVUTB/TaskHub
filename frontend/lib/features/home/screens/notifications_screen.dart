@@ -43,6 +43,26 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     }
   }
 
+  Future<void> _deleteNotification(String notificationId) async {
+    try {
+      await NotificationService().deleteNotification(notificationId);
+      if (mounted) {
+        setState(() {
+          _notifications.removeWhere((n) => n.id == notificationId);
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Notificación eliminada.')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al eliminar notificación: $e')),
+        );
+      }
+    }
+  }
+
   Future<void> _markAsRead(String notificationId) async {
     try {
       await NotificationService().markNotificationAsRead(notificationId);
@@ -54,8 +74,29 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     }
   }
 
+  Future<void> _markAllAsRead() async {
+    try {
+      await NotificationService().markAllNotificationsAsRead();
+      await _fetchNotifications(); // Refresh the list
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Todas las notificaciones marcadas como leídas.')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al marcar todas como leídas: $e')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Determine if there are any unread notifications to enable/disable the button
+    // bool hasUnreadNotifications = _notifications.any((n) => !n.isRead);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Notificaciones'),
@@ -74,6 +115,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             context.pop();
           },
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.done_all),
+            tooltip: 'Marcar todas como leídas',
+            // onPressed: hasUnreadNotifications ? _markAllAsRead : null, // Optionally disable if all are read
+            onPressed: _markAllAsRead,
+          ),
+        ],
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
@@ -132,13 +181,22 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                   Text('Leída: ${notif.readAt}'),
                               ],
                             ),
-                            trailing: notif.isRead
-                                ? null
-                                : IconButton(
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (!notif.isRead)
+                                  IconButton(
                                     icon: const Icon(Icons.mark_email_read, color: AppColors.primary),
                                     tooltip: 'Marcar como leído',
                                     onPressed: () => _markAsRead(notif.id),
                                   ),
+                                IconButton(
+                                  icon: Icon(Icons.delete_outline, color: Colors.grey[600]),
+                                  tooltip: 'Eliminar notificación',
+                                  onPressed: () => _deleteNotification(notif.id),
+                                ),
+                              ],
+                            ),
                             onTap: () {
                               Feedback.forTap(context);
                               // Acción al tocar la notificación (por ejemplo, navegar a la entidad relacionada)

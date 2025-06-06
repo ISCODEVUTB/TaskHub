@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import '../data/auth_service.dart';
+// UserProfileDTO is not directly used in this screen after AuthService.login refactor,
+// but good to have if we were to receive UserProfileDTO here.
+// import '../data/auth_models.dart';
 import '../../../core/widgets/custom_textfield.dart';
 import '../../../core/widgets/primary_button.dart';
 
@@ -17,18 +22,33 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _error;
 
   void _login() async {
-    setState(() => _isLoading = true);
-    // Simulación de login. Aquí va llamada a AuthService
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() => _isLoading = false);
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
 
-    if (_emailController.text == 'admin@taskhub.com' &&
-        _passwordController.text == '123456') {
-      // Redirigir a Home usando go_router
+    try {
+      final authService = Provider.of<AuthService>(context, listen: false);
+      // AuthService.login now handles setting the user state and returns UserProfileDTO
+      // We don't need to use the returned UserProfileDTO directly here unless for specific UI update before navigation
+      await authService.login(_emailController.text.trim(), _passwordController.text.trim());
+
       if (!mounted) return;
       context.go('/dashboard');
-    } else {
-      setState(() => _error = 'Credenciales incorrectas');
+
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          // You can customize error messages based on exception type if needed
+          _error = 'Login failed. Please check your credentials or network connection.';
+          // Example of more specific error:
+          // _error = e is Exception ? e.toString().replaceFirst("Exception: ", "") : 'An unknown error occurred.';
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 

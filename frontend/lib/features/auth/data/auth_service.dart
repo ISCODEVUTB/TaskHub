@@ -2,158 +2,81 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'auth_models.dart';
-import 'package:flutter/foundation.dart';
-
-// Simple User model
-class User {
-  final String? uid;
-  final String? displayName;
-  final String? email;
-  final String? photoURL;
-
-  User({this.uid, this.displayName, this.email, this.photoURL});
-}
+import 'package:flutter/foundation.dart'; // ChangeNotifier is here
 
 // This is a simplified auth service. In a real app, you would integrate
 // with Firebase Auth, your own backend, or another auth provider.
 class AuthService extends ChangeNotifier {
-  static const String baseUrl = 'http://localhost:8000'; // Cambia por tu IP real
-  final storage = const FlutterSecureStorage();
+  static const String baseUrl = 'http://api_gateway:8000';
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
-  User? _currentUser;
+  UserProfileDTO? _currentUser;
 
-  User? get currentUser => _currentUser;
+  UserProfileDTO? get currentUser => _currentUser;
 
   // Check if user is logged in
   bool get isLoggedIn => _currentUser != null;
 
-  // Constructor - initialize with a debug user in debug mode
+  // Constructor
   AuthService() {
-    // Simulamos un usuario autenticado para desarrollo
-    if (kDebugMode) {
-      _currentUser = User(
-        uid: 'user123',
-        displayName: 'Usuario de Prueba',
-        email: 'usuario@example.com',
-        photoURL: null,
-      );
-      notifyListeners();
-    }
+    initialize();
   }
 
   // Initialize the auth service and check for existing session
   Future<void> initialize() async {
-    // Here you would check for existing auth tokens in secure storage
-    // and validate them with your backend
     try {
-      // Skip if we already have a debug user
-      if (_currentUser != null) return;
-
-      // Simulate loading user data
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      // For demo purposes, we'll assume no user is logged in initially
+      final token = await _secureStorage.read(key: 'access_token');
+      if (token != null && token.isNotEmpty) {
+        // Validate token by fetching profile
+        final userProfile = await getProfile(); // getProfile uses the stored token
+        _currentUser = userProfile;
+      } else {
+        _currentUser = null;
+      }
+    } catch (e) {
+      // If getProfile fails (e.g. token expired), clear token and user
+      await _secureStorage.delete(key: 'access_token');
+      await _secureStorage.delete(key: 'refresh_token');
       _currentUser = null;
-      notifyListeners();
-    } catch (e) {
-      // Handle initialization error
-      _currentUser = null;
-      notifyListeners();
     }
+    notifyListeners();
   }
 
-  // Sign in with email and password
-  Future<User?> signIn(String email, String password) async {
-    // Here you would make an API call to your auth endpoint
-    try {
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 1));
-
-      // For demo purposes, we'll create a mock user
-      _currentUser = User(
-        uid: 'user123',
-        email: email,
-        displayName: 'Usuario Autenticado',
-        photoURL: null,
-      );
-
-      notifyListeners();
-      return _currentUser;
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  // Sign up with name, email and password
-  Future<User?> signUp(String name, String email, String password) async {
-    try {
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 1));
-
-      // For demo purposes, we'll create a mock user
-      _currentUser = User(
-        uid: 'newuser456',
-        email: email,
-        displayName: name,
-        photoURL: null,
-      );
-
-      notifyListeners();
-      return _currentUser;
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  // Sign out
-  Future<void> signOut() async {
-    // Here you would invalidate tokens on your backend
-    try {
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 1));
-
-      _currentUser = null;
-      notifyListeners();
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  // Update user profile
-  Future<void> updateProfile({String? displayName, String? email}) async {
-    final token = await storage.read(key: 'access_token');
-    final response = await http.put(
-      Uri.parse('$baseUrl/auth/profile'),
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        if (displayName != null) 'full_name': displayName,
-        if (email != null) 'email': email,
-      }),
-    );
-    if (response.statusCode != 200) {
-      throw Exception('Error al actualizar perfil');
-    }
-  }
-
-  Future<TokenDTO> login(String email, String password) async {
+  // Login with email and password
+  Future<UserProfileDTO> login(String email, String password) async {
     final response = await http.post(
       Uri.parse('$baseUrl/auth/login'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'email': email, 'password': password}),
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'}, // Backend expects form data for login
+      body: {'username': email, 'password': password}, // FastAPI's OAuth2PasswordRequestForm takes 'username'
     );
+
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      await storage.write(key: 'access_token', value: data['access_token']);
-      return TokenDTO.fromJson(data);
+      final tokenDto = TokenDTO.fromJson(data);
+      await _secureStorage.write(key: 'access_token', value: tokenDto.accessToken);
+      await _secureStorage.write(key: 'refresh_token', value: tokenDto.refreshToken);
+
+      try {
+        _currentUser = await getProfile();
+        notifyListeners();
+        return _currentUser!; // Assuming getProfile will throw if it can't return a user
+      } catch (e) {
+        // If getProfile fails after login, something is wrong. Clean up.
+        await _secureStorage.delete(key: 'access_token');
+        await _secureStorage.delete(key: 'refresh_token');
+        _currentUser = null;
+        notifyListeners();
+        throw Exception('Login succeeded but failed to fetch profile: ${e.toString()}');
+      }
     } else {
-      throw Exception('Login failed');
+      _currentUser = null;
+      notifyListeners();
+      throw Exception('Login failed with status ${response.statusCode}: ${response.body}');
     }
   }
 
-  Future<TokenDTO> register(String email, String password, String fullName, String companyName) async {
+  // Register with email, password, full name, and company name
+  Future<UserProfileDTO> register(String email, String password, String fullName, String? companyName) async {
     final response = await http.post(
       Uri.parse('$baseUrl/auth/register'),
       headers: {'Content-Type': 'application/json'},
@@ -161,28 +84,116 @@ class AuthService extends ChangeNotifier {
         'email': email,
         'password': password,
         'full_name': fullName,
-        'company_name': companyName,
+        if (companyName != null && companyName.isNotEmpty) 'company_name': companyName,
       }),
     );
-    if (response.statusCode == 200) {
+
+    if (response.statusCode == 200 || response.statusCode == 201) { // Typically 201 for register
       final data = jsonDecode(response.body);
-      await storage.write(key: 'access_token', value: data['access_token']);
-      return TokenDTO.fromJson(data);
+      final tokenDto = TokenDTO.fromJson(data);
+      await _secureStorage.write(key: 'access_token', value: tokenDto.accessToken);
+      await _secureStorage.write(key: 'refresh_token', value: tokenDto.refreshToken);
+
+      try {
+        _currentUser = await getProfile();
+        notifyListeners();
+        return _currentUser!;
+      } catch (e) {
+        await _secureStorage.delete(key: 'access_token');
+        await _secureStorage.delete(key: 'refresh_token');
+        _currentUser = null;
+        notifyListeners();
+        throw Exception('Registration succeeded but failed to fetch profile: ${e.toString()}');
+      }
     } else {
-      throw Exception('Register failed');
+      _currentUser = null;
+      notifyListeners();
+      throw Exception('Register failed with status ${response.statusCode}: ${response.body}');
     }
   }
 
+  // Sign out
+  Future<void> signOut() async {
+    final token = await _secureStorage.read(key: 'access_token');
+    if (token != null) {
+      try {
+        await http.post(
+          Uri.parse('$baseUrl/auth/logout'),
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        );
+        // Regardless of API call success, clear local data
+      } catch (e) {
+        // Log error or handle silently, but still proceed with local cleanup
+        if (kDebugMode) {
+          print('Error during API logout: $e');
+        }
+      }
+    }
+
+    await _secureStorage.delete(key: 'access_token');
+    await _secureStorage.delete(key: 'refresh_token');
+    _currentUser = null;
+    notifyListeners();
+  }
+
+  // Get user profile
   Future<UserProfileDTO> getProfile() async {
-    final token = await storage.read(key: 'access_token');
+    final token = await _secureStorage.read(key: 'access_token');
+    if (token == null) {
+      throw Exception('Not authenticated: No token found.');
+    }
+
     final response = await http.get(
       Uri.parse('$baseUrl/auth/profile'),
       headers: {'Authorization': 'Bearer $token'},
     );
+
     if (response.statusCode == 200) {
       return UserProfileDTO.fromJson(jsonDecode(response.body));
+    } else if (response.statusCode == 401) { // Unauthorized
+        await _secureStorage.delete(key: 'access_token');
+        await _secureStorage.delete(key: 'refresh_token');
+        _currentUser = null;
+        notifyListeners();
+        throw Exception('Session expired or token invalid. Please login again.');
+    }
+    else {
+      throw Exception('Failed to fetch profile with status ${response.statusCode}: ${response.body}');
+    }
+  }
+
+  // Update user profile
+  Future<void> updateProfile({String? displayName, String? email}) async {
+    final token = await _secureStorage.read(key: 'access_token');
+    if (token == null) {
+      throw Exception('Not authenticated for updating profile.');
+    }
+
+    final Map<String, String> body = {};
+    if (displayName != null) body['full_name'] = displayName;
+    if (email != null) body['email'] = email;
+
+    if (body.isEmpty) {
+      return; // No changes to update
+    }
+
+    final response = await http.put(
+      Uri.parse('$baseUrl/auth/profile'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 200) {
+      // Optionally, re-fetch profile to update _currentUser if email or other critical fields changed
+      _currentUser = await getProfile();
+      notifyListeners();
     } else {
-      throw Exception('Profile fetch failed');
+      throw Exception('Error al actualizar perfil: ${response.body}');
     }
   }
 }

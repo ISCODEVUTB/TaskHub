@@ -4,7 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'notification_models.dart';
 
 class NotificationService {
-  static const String baseUrl = 'http://localhost:8000';
+  static const String baseUrl = 'http://api_gateway:8000';
   final storage = const FlutterSecureStorage();
 
   Future<List<NotificationDTO>> getNotifications() async {
@@ -40,6 +40,19 @@ class NotificationService {
     );
     if (response.statusCode != 200) {
       throw Exception('Failed to delete notification');
+    }
+  }
+
+  Future<void> markAllNotificationsAsRead() async {
+    final token = await storage.read(key: 'access_token');
+    final response = await http.put(
+      Uri.parse('$baseUrl/notifications/read-all'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    // Backend returns a dictionary like {"message": "...", "count": ...}, so 200 is expected.
+    // 204 No Content could also be valid for some PUT operations if nothing is returned.
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception('Failed to mark all notifications as read. Status: ${response.statusCode}');
     }
   }
 

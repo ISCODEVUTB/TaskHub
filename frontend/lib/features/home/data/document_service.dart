@@ -4,7 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'document_models.dart';
 
 class DocumentService {
-  static const String baseUrl = 'http://localhost:8000';
+  static const String baseUrl = 'http://api_gateway:8000';
   final storage = const FlutterSecureStorage();
 
   Future<List<DocumentDTO>> getProjectDocuments(String projectId) async {

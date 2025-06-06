@@ -4,7 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'project_models.dart';
 
 class ProjectService {
-  static const String baseUrl = 'http://localhost:8000';
+  static const String baseUrl = 'http://api_gateway:8000';
   final storage = const FlutterSecureStorage();
 
   Future<List<ProjectDTO>> getProjects() async {
@@ -104,6 +104,19 @@ class ProjectService {
       return data.map((e) => TaskDTO.fromJson(e)).toList();
     } else {
       throw Exception('Failed to fetch project tasks');
+    }
+  }
+
+  Future<TaskDTO> getTaskDetails(String projectId, String taskId) async {
+    final token = await storage.read(key: 'access_token');
+    final response = await http.get(
+      Uri.parse('$baseUrl/projects/$projectId/tasks/$taskId'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (response.statusCode == 200) {
+      return TaskDTO.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Failed to fetch task details');
     }
   }
 
