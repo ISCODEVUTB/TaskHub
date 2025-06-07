@@ -402,7 +402,8 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
           child: ListTile(
             leading: Icon(docIcon, color: AppColors.primary, size: 30),
             title: Text(doc.name, style: const TextStyle(fontWeight: FontWeight.w500)),
-            subtitle: Text(doc.description ?? 'Tipo: ${doc.type.toString().split('.').last} - ${doc.createdAt.toLocal().toString().substring(0,16)}'),
+            // Use documentTypeToString helper
+            subtitle: Text(doc.description ?? 'Tipo: ${documentTypeToString(doc.type)} - ${doc.createdAt.toLocal().toString().substring(0,16)}'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               if (widget.projectId != null) {

@@ -111,7 +111,7 @@ class _DocumentDetailScreenState extends State<DocumentDetailScreen> {
         Text(doc.name, style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
         const SizedBox(height: 16),
         _buildDetailItem(Icons.description, 'Descripción:', doc.description ?? 'Sin descripción'),
-        _buildDetailItem(Icons.folder_special, 'Tipo:', doc.type.toString().split('.').last),
+        _buildDetailItem(Icons.folder_special, 'Tipo:', documentTypeToString(doc.type)), // Used helper
         _buildDetailItem(Icons.inventory_2, 'Proyecto ID:', doc.projectId), // Displaying projectId from widget
         _buildDetailItem(Icons.person, 'Creador ID:', doc.creatorId),
         _buildDetailItem(Icons.tag, 'Versión:', doc.version.toString()),
