@@ -4,10 +4,11 @@ import '../data/project_service.dart';
 import '../data/project_models.dart';
 import '../data/document_service.dart';
 import '../data/document_models.dart';
-import './document_detail_screen.dart'; // Added import
+import './document_detail_screen.dart';
 import 'task_detail_screen.dart';
 import '../../../core/widgets/section_card.dart';
 import '../../../core/widgets/navigation_utils.dart';
+import '../../../core/constants/colors.dart'; // Added AppColors import
 
 class ProjectDetailPage extends StatefulWidget {
   final String? projectId;

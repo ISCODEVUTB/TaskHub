@@ -22,6 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _error;
 
   void _login() async {
+    print('[LoginScreen] _login method CALLED');
     setState(() {
       _isLoading = true;
       _error = null;

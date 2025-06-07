@@ -14,6 +14,7 @@ class TaskDetailScreen extends StatefulWidget {
 }
 
 class _TaskDetailScreenState extends State<TaskDetailScreen> {
+  final ProjectService _service = ProjectService(); // Added service instance
   TaskDTO? _task;
   bool _loading = true;
   String? _error;

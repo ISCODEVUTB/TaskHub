@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/strings.dart';
 import '../../../core/constants/colors.dart';
 import '../data/project_service.dart';
+import '../data/project_models.dart'; // Added import for ProjectDTO
 
 class ProjectEditScreen extends StatefulWidget {
   final String? projectId;

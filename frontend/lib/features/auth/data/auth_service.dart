@@ -44,6 +44,11 @@ class AuthService extends ChangeNotifier {
 
   // Login with email and password
   Future<UserProfileDTO> login(String email, String password) async {
+    print('[AuthService.login] Attempting to login...');
+    print('[AuthService.login] URL: $baseUrl/auth/login');
+    print('[AuthService.login] Headers: {Content-Type: application/x-www-form-urlencoded}');
+    print('[AuthService.login] Body: {username: $email, password: <hidden>}');
+
     final response = await http.post(
       Uri.parse('$baseUrl/auth/login'),
       headers: {'Content-Type': 'application/x-www-form-urlencoded'}, // Backend expects form data for login
@@ -51,6 +56,8 @@ class AuthService extends ChangeNotifier {
     );
 
     if (response.statusCode == 200) {
+      print('[AuthService.login] Login API call successful. Status: ${response.statusCode}');
+      print('[AuthService.login] Response body: ${response.body}');
       final data = jsonDecode(response.body);
       final tokenDto = TokenDTO.fromJson(data);
       await _secureStorage.write(key: 'access_token', value: tokenDto.accessToken);
@@ -61,6 +68,7 @@ class AuthService extends ChangeNotifier {
         notifyListeners();
         return _currentUser!; // Assuming getProfile will throw if it can't return a user
       } catch (e) {
+        print('[AuthService.login] Error fetching profile after login: ${e.toString()}');
         // If getProfile fails after login, something is wrong. Clean up.
         await _secureStorage.delete(key: 'access_token');
         await _secureStorage.delete(key: 'refresh_token');
@@ -69,6 +77,8 @@ class AuthService extends ChangeNotifier {
         throw Exception('Login succeeded but failed to fetch profile: ${e.toString()}');
       }
     } else {
+      print('[AuthService.login] Login API call failed. Status: ${response.statusCode}');
+      print('[AuthService.login] Response body: ${response.body}');
       _currentUser = null;
       notifyListeners();
       throw Exception('Login failed with status ${response.statusCode}: ${response.body}');
@@ -77,18 +87,29 @@ class AuthService extends ChangeNotifier {
 
   // Register with email, password, full name, and company name
   Future<UserProfileDTO> register(String email, String password, String fullName, String? companyName) async {
+    print('[AuthService.register] Attempting to register...');
+    print('[AuthService.register] URL: $baseUrl/auth/register');
+    final requestBodyMap = {
+      'email': email,
+      'password': password,
+      'full_name': fullName,
+      if (companyName != null && companyName.isNotEmpty) 'company_name': companyName,
+    };
+    print('[AuthService.register] Headers: {Content-Type: application/json}');
+    // Mask password for logging
+    final loggableBody = Map.from(requestBodyMap);
+    loggableBody['password'] = '<hidden>';
+    print('[AuthService.register] Request body (raw): $loggableBody');
+
     final response = await http.post(
       Uri.parse('$baseUrl/auth/register'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'email': email,
-        'password': password,
-        'full_name': fullName,
-        if (companyName != null && companyName.isNotEmpty) 'company_name': companyName,
-      }),
+      body: jsonEncode(requestBodyMap), // Send original map with actual password
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) { // Typically 201 for register
+      print('[AuthService.register] Register API call successful. Status: ${response.statusCode}');
+      print('[AuthService.register] Response body: ${response.body}');
       final data = jsonDecode(response.body);
       final tokenDto = TokenDTO.fromJson(data);
       await _secureStorage.write(key: 'access_token', value: tokenDto.accessToken);
@@ -99,6 +120,7 @@ class AuthService extends ChangeNotifier {
         notifyListeners();
         return _currentUser!;
       } catch (e) {
+        print('[AuthService.register] Error fetching profile after registration: ${e.toString()}');
         await _secureStorage.delete(key: 'access_token');
         await _secureStorage.delete(key: 'refresh_token');
         _currentUser = null;
@@ -106,6 +128,8 @@ class AuthService extends ChangeNotifier {
         throw Exception('Registration succeeded but failed to fetch profile: ${e.toString()}');
       }
     } else {
+      print('[AuthService.register] Register API call failed. Status: ${response.statusCode}');
+      print('[AuthService.register] Response body: ${response.body}');
       _currentUser = null;
       notifyListeners();
       throw Exception('Register failed with status ${response.statusCode}: ${response.body}');

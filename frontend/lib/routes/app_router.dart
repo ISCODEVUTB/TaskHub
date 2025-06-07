@@ -51,7 +51,7 @@ class _MainShellState extends State<MainShell> {
     final location = GoRouterState.of(context).uri.toString();
     // Mejor lógica: si la ruta contiene la base, resalta el icono
     for (int i = 0; i < _routes.length; i++) {
-      if (location == _routes[i] || location.startsWith('${_routes[i]}/') ||
+      if (location == _routes[i] || location.startsWith(_routes[i] + '/') ||
           (i == 1 && location.startsWith('/project')) || // Proyectos e hijas
           (i == 2 && location.startsWith('/document')) || // Documentos e hijas
           (i == 4 && location.startsWith('/tool')) // Herramientas e hijas
@@ -187,7 +187,7 @@ class AppRouter {
       }
       // Verificar perfil (opcional: puedes cachear el resultado)
       try {
-        await AuthService().getProfile();
+        final profile = await AuthService().getProfile();
         // Si quieres forzar verificación, puedes chequear un campo aquí
         // if (!profile.isVerified) return '/login';
         return null;
@@ -327,10 +327,7 @@ class AppRouter {
           GoRoute(
             path: '/document/:id',
             pageBuilder: (context, state) => CustomTransitionPage(
-              child: DocumentDetailScreen(
-                documentId: state.pathParameters['id']!,
-                projectId: state.uri.queryParameters['projectId'] ?? '', // or provide the correct value here
-              ),
+              child: DocumentDetailScreen(documentId: state.pathParameters['id']),
               transitionsBuilder: (context, animation, secondaryAnimation, child) =>
                 FadeTransition(opacity: animation, child: child),
             ),
@@ -347,12 +344,8 @@ class AppRouter {
             path: '/dev-bypass',
             builder: (context, state) {
               // Simula un token válido y navega al dashboard
-              const FlutterSecureStorage().write(key: 'access_token', value: 'TOKEN_VALIDO_AQUI');
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (context.mounted) {
-                  context.go('/dashboard');
-                }
-              });
+              AuthService().storage.write(key: 'access_token', value: 'TOKEN_VALIDO_AQUI');
+              Future.microtask(() => context.go('/dashboard'));
               return const Scaffold(
                 body: Center(child: CircularProgressIndicator()),
               );

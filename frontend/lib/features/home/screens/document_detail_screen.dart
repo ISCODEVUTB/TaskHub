@@ -21,6 +21,7 @@ class DocumentDetailScreen extends StatefulWidget {
 }
 
 class _DocumentDetailScreenState extends State<DocumentDetailScreen> {
+  final DocumentService _documentService = DocumentService(); // Added instance
   DocumentDTO? _document;
   bool _loading = true;
   String? _error;
@@ -53,8 +54,9 @@ class _DocumentDetailScreenState extends State<DocumentDetailScreen> {
     } finally {
       if (mounted) { // mounted check for finally block
         setState(() {
-        _loading = false;
-      });
+          _loading = false;
+        }); // Corrected brace
+      }
     }
   }
 
@@ -172,4 +174,4 @@ class _DocumentDetailScreenState extends State<DocumentDetailScreen> {
       ),
     );
   }
-} 
+}

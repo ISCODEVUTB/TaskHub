@@ -81,12 +81,15 @@ class _ToolCalendarScreenState extends State<ToolCalendarScreen> {
     } catch (e) {
       if (mounted) { // Add mounted check
         setState(() {
-        _error = e.toString();
-      });
+          _error = e.toString();
+        });
+      } // Closing brace for if (mounted)
     } finally {
-      setState(() {
-        _loading = false;
-      });
+      if (mounted) { // Add mounted check for finally
+        setState(() {
+          _loading = false;
+        });
+      }
     }
   }
 

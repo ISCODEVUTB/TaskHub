@@ -103,7 +103,7 @@ class ProfilePage extends StatelessWidget {
                   ),
                   color: Theme.of(context).cardColor,
                   child: ListTile(
-                    leading: const Icon(Icons.logout, color: AppColors.danger), // Or another distinct color
+                    leading: const Icon(Icons.logout, color: AppColors.error), // Corrected color
                     title: const Text('Cerrar Sesión'),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () async {

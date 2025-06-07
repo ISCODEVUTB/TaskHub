@@ -22,6 +22,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _isLoading = false;
 
   void _register() async {
+    print('[RegisterScreen] _register method CALLED');
     setState(() {
       _error = null;
       _isLoading = true;

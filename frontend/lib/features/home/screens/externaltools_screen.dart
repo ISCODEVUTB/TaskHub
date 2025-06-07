@@ -174,7 +174,7 @@ class _ExternalToolsScreenState extends State<ExternalToolsScreen> {
         return Icons.code;
       // Add other cases as defined in your ExternalToolType enum or data
       case 'google_drive': // Assuming 'google_drive' is a value from your ExternalToolType
-        return Icons.cloud_outline; // Example, adjust as needed
+        return Icons.cloud_outlined; // Corrected icon name
       default:
         return Icons.extension;
     }
