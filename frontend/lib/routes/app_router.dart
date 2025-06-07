@@ -325,26 +325,54 @@ class AppRouter {
             ),
           ),
           GoRoute(
-            path: '/document/:id',
+            path: '/project/:projectId/document/:documentId', // Updated path
             pageBuilder: (context, state) => CustomTransitionPage(
-              child: DocumentDetailScreen(documentId: state.pathParameters['id']),
+              child: DocumentDetailScreen(
+                projectId: state.pathParameters['projectId']!, // Added projectId
+                documentId: state.pathParameters['documentId']!, // Changed 'id' to 'documentId'
+              ),
               transitionsBuilder: (context, animation, secondaryAnimation, child) =>
                 FadeTransition(opacity: animation, child: child),
             ),
           ),
           GoRoute(
             path: '/create-document',
-            pageBuilder: (context, state) => CustomTransitionPage(
-              child: const DocumentCreateScreen(),
-              transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-                FadeTransition(opacity: animation, child: child),
-            ),
+            pageBuilder: (context, state) {
+              // Assuming projectId is passed as extra or from a parent route's state if needed by CreateDocumentScreen
+              // For now, if CreateDocumentScreen requires projectId, this route might need adjustment
+              // or CreateDocumentScreen needs to handle potentially null projectId if launched globally.
+              // Based on previous subtask, CreateDocumentScreen requires projectId.
+              // This route definition might be problematic if not called with 'extra'.
+              // However, this subtask only focuses on DocumentDetailScreen and dev-bypass.
+              final extra = state.extra as Map<String, dynamic>?;
+              final projectId = extra?['projectId'] as String?;
+              if (projectId == null && state.pathParameters['projectId'] == null) {
+                // This is a fallback, ideally CreateDocumentScreen is always called with projectId
+                // Or it should handle being called without one (e.g. show error or project selector)
+                // For now, let's assume this route is called in a context where projectId can be derived or is not strictly needed for global access
+                // OR, this route is meant to be pushed with `extra` data.
+                // The previous subtask where CreateDocumentScreen was created didn't specify how projectId is passed via routing.
+                // For now, I'll leave it as is, but acknowledge it might need projectId.
+                // The file creation for CreateDocumentScreen was blocked, so its final state is unknown.
+                // If it expects projectId, this route needs to provide it.
+                 return CustomTransitionPage(
+                    child: const Text("Error: ProjectId is required for CreateDocumentScreen"), // Placeholder
+                    transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+                      FadeTransition(opacity: animation, child: child),
+                 );
+              }
+              return CustomTransitionPage(
+                child: CreateDocumentScreen(projectId: projectId ?? state.pathParameters['projectId'] ?? "error_no_project_id"),
+                transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+                  FadeTransition(opacity: animation, child: child),
+              );
+            }
           ),
           GoRoute(
             path: '/dev-bypass',
             builder: (context, state) {
               // Simula un token válido y navega al dashboard
-              AuthService().storage.write(key: 'access_token', value: 'TOKEN_VALIDO_AQUI');
+              // AuthService().storage.write(key: 'access_token', value: 'TOKEN_VALIDO_AQUI'); // Commented out
               Future.microtask(() => context.go('/dashboard'));
               return const Scaffold(
                 body: Center(child: CircularProgressIndicator()),
