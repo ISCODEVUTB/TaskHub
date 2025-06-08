@@ -107,6 +107,19 @@ class ProjectService {
     }
   }
 
+  Future<TaskDTO> getTaskDetails(String projectId, String taskId) async {
+    final token = await storage.read(key: 'access_token');
+    final response = await http.get(
+      Uri.parse('$baseUrl/projects/$projectId/tasks/$taskId'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (response.statusCode == 200) {
+      return TaskDTO.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Failed to fetch task details');
+    }
+  }
+
   Future<List<ActivityDTO>> getProjectActivities(String projectId) async {
     final token = await storage.read(key: 'access_token');
     final response = await http.get(

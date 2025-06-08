@@ -127,7 +127,7 @@ class _DocumentsPageState extends State<DocumentsPage> {
                             ),
                             onTap: () {
                               Feedback.forTap(context);
-                              context.go('/document/${doc.id}');
+                              context.go('/project/${doc.projectId}/document/${doc.id}');
                             },
                           ),
                         );

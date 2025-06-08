@@ -42,14 +42,15 @@ class _CreateProjectPageState extends State<CreateProjectPage> {
         final description = _descriptionController.text.isNotEmpty ? _descriptionController.text : null;
         final startDate = _startDateController.text.isNotEmpty ? DateTime.parse(_startDateController.text) : null;
         final endDate = _endDateController.text.isNotEmpty ? DateTime.parse(_endDateController.text) : null;
-        await ProjectService().createProject(
+        // Ensure ProjectDTO is available, typically via project_service.dart or project_models.dart import
+        final createdProject = await ProjectService().createProject(
           name: name,
           description: description,
           startDate: startDate,
           endDate: endDate,
         );
         if (!mounted) return;
-        context.pop();
+        context.go('/project/${createdProject.id}');
       } catch (e) {
         setState(() {
           _error = 'Error al crear proyecto: '

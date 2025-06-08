@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/strings.dart';
 import '../../../core/constants/colors.dart';
 import '../data/project_service.dart';
+import '../data/project_models.dart'; // Added import for ProjectDTO
 
 class ProjectEditScreen extends StatefulWidget {
   final String? projectId;
@@ -19,24 +20,59 @@ class _ProjectEditScreenState extends State<ProjectEditScreen> {
   late TextEditingController _startDateController;
   late TextEditingController _endDateController;
   late TextEditingController _membersController;
-  bool _isLoading = false;
+  bool _isLoading = true; // Set to true initially as we'll be fetching
   String? _error;
+  ProjectDTO? _project; // Added state variable for the project
 
   @override
   void initState() {
     super.initState();
-    // Prefill with simulated data
-    _nameController = TextEditingController(
-      text: 'Proyecto ${widget.projectId}',
-    );
-    _descriptionController = TextEditingController(
-      text: 'Descripción detallada del proyecto ${widget.projectId}',
-    );
-    _startDateController = TextEditingController(text: '2023-06-01');
-    _endDateController = TextEditingController(text: '2023-12-31');
-    _membersController = TextEditingController(
-      text: 'Ana García, Carlos López, María Rodríguez',
-    );
+    // Initialize controllers without text first
+    _nameController = TextEditingController();
+    _descriptionController = TextEditingController();
+    _startDateController = TextEditingController();
+    _endDateController = TextEditingController();
+    _membersController = TextEditingController();
+
+    _fetchProjectDetails(); // Call new method
+  }
+
+  Future<void> _fetchProjectDetails() async {
+    if (widget.projectId == null) {
+      setState(() {
+        _error = 'ID de proyecto no disponible.';
+        _isLoading = false;
+      });
+      return;
+    }
+    // Initial _isLoading is true, no need to set it again here unless re-fetching
+    // If called for a refresh, then:
+    // setState(() { _isLoading = true; _error = null; });
+    try {
+      final projectData = await ProjectService().getProjectById(widget.projectId!);
+      if (mounted) {
+        setState(() {
+          _project = projectData;
+          _nameController.text = projectData.name;
+          _descriptionController.text = projectData.description ?? '';
+          _startDateController.text = projectData.startDate?.toIso8601String().substring(0, 10) ?? '';
+          _endDateController.text = projectData.endDate?.toIso8601String().substring(0, 10) ?? '';
+          // _membersController is not directly tied to ProjectDTO fields for now
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = 'Error al cargar datos del proyecto: ${e.toString()}';
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -98,25 +134,21 @@ class _ProjectEditScreenState extends State<ProjectEditScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Editar proyecto'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.textOnPrimary,
-        elevation: 2,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(bottom: Radius.circular(18)),
+    Widget bodyContent;
+    if (_isLoading) {
+      bodyContent = const Center(child: CircularProgressIndicator());
+    } else if (_error != null) {
+      bodyContent = Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(_error!, style: const TextStyle(color: Colors.red, fontSize: 16)),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          tooltip: 'Regresar',
-          onPressed: () {
-            Feedback.forTap(context);
-            context.pop();
-          },
-        ),
-      ),
-      body: Padding(
+      );
+    } else if (_project == null) {
+      bodyContent = const Center(child: Text('Proyecto no encontrado.'));
+    } else {
+      // Form content when data is loaded
+      bodyContent = Padding(
         padding: const EdgeInsets.all(24.0),
         child: Form(
           key: _formKey,
@@ -225,14 +257,39 @@ class _ProjectEditScreenState extends State<ProjectEditScreen> {
                 icon: const Icon(Icons.save),
                 label: const Text('Guardar cambios'),
               ),
-              if (_error != null) ...[
-                const SizedBox(height: 12),
-                Text(_error!, style: const TextStyle(color: Colors.red)),
+              // Error display is now handled by the main bodyContent logic for _error
+              // We can keep a smaller error display for save errors specifically if needed,
+              // but the main _error will cover fetch errors.
+              // For save errors, the existing display after the button is fine.
+              if (_error != null && !_isLoading) ...[ // Show save error if not loading
+                 const SizedBox(height: 12),
+                 Text(_error!, style: const TextStyle(color: Colors.red)),
               ],
             ],
           ),
         ),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(_project?.name ?? 'Editar proyecto'), // Dynamic title
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.textOnPrimary,
+        elevation: 2,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(18)),
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          tooltip: 'Regresar',
+          onPressed: () {
+            Feedback.forTap(context);
+            context.pop();
+          },
+        ),
       ),
+      body: bodyContent,
     );
   }
 }

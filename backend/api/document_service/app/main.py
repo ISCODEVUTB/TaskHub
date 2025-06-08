@@ -10,6 +10,8 @@ from fastapi import (
     Security,
     UploadFile,
     File,
+    HTTPException,
+    Header
 )
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
@@ -55,29 +57,10 @@ app.add_middleware(
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 
-def get_current_user(token: str = Security(oauth2_scheme)) -> str:
-    """
-    Get current user ID from token.
-
-    Args:
-        token (str): JWT token
-
-    Returns:
-        str: User ID
-
-    Raises:
-        InvalidTokenException: If token is invalid
-    """
-    try:
-        payload = decode_token(token)
-        user_id = payload.get("sub")
-
-        if not user_id:
-            raise InvalidTokenException()
-
-        return user_id
-    except Exception:
-        raise InvalidTokenException()
+async def get_current_user(x_user_id: Optional[str] = Header(None, alias="X-User-ID")) -> str:
+    if not x_user_id:
+        raise HTTPException(status_code=401, detail="Not authenticated (X-User-ID header missing)")
+    return x_user_id
 
 
 # Document endpoints

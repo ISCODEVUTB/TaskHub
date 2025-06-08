@@ -43,6 +43,19 @@ class NotificationService {
     }
   }
 
+  Future<void> markAllNotificationsAsRead() async {
+    final token = await storage.read(key: 'access_token');
+    final response = await http.put(
+      Uri.parse('$baseUrl/notifications/read-all'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    // Backend returns a dictionary like {"message": "...", "count": ...}, so 200 is expected.
+    // 204 No Content could also be valid for some PUT operations if nothing is returned.
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception('Failed to mark all notifications as read. Status: ${response.statusCode}');
+    }
+  }
+
   // Nuevo: obtener notificaciones del usuario
   Future<List<NotificationDTO>> getUserNotifications() async {
     return getNotifications();

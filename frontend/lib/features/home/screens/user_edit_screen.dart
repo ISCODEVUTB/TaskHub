@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart'; // Added import
 import '../../../core/constants/colors.dart';
 import '../../auth/data/auth_service.dart';
 
@@ -20,9 +21,24 @@ class _UserEditScreenState extends State<UserEditScreen> {
   @override
   void initState() {
     super.initState();
-    // Load current user data (simulated)
-    _nameController.text = 'Nombre del Usuario';
-    _emailController.text = 'usuario@taskhub.com';
+    // Use WidgetsBinding.instance.addPostFrameCallback to safely access context
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authService = Provider.of<AuthService>(context, listen: false);
+      if (authService.currentUser != null) {
+        _nameController.text = authService.currentUser!.fullName;
+        _emailController.text = authService.currentUser!.email;
+      } else {
+        // Handle case where user data is not available (e.g. user not logged in)
+        // This screen should ideally not be reachable if currentUser is null.
+        // For now, fields will be blank or could show an error/pop.
+        // Consider setting an error or popping if this state is critical.
+        if (mounted) {
+          setState(() {
+            _error = "No se pudieron cargar los datos del usuario.";
+          });
+        }
+      }
+    });
   }
 
   @override
@@ -39,7 +55,8 @@ class _UserEditScreenState extends State<UserEditScreen> {
         _error = null;
       });
       try {
-        await AuthService().updateProfile(
+        final authService = Provider.of<AuthService>(context, listen: false);
+        await authService.updateProfile(
           displayName: _nameController.text,
           email: _emailController.text,
         );

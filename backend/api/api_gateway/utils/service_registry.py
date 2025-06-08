@@ -151,6 +151,9 @@ class ServiceRegistry:
                         "methods": ["POST"],
                     },
                     {"path": "/health", "methods": ["GET"]},
+                    {"path": "/analytics/card/{card_id}", "methods": ["GET"]},
+                    {"path": "/calendar/events", "methods": ["GET", "POST"]},
+                    {"path": "/ai/inference/{model}", "methods": ["POST"]},
                 ],
             },
         }

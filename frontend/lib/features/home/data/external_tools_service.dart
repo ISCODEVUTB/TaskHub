@@ -21,6 +21,58 @@ class ExternalToolsService {
     }
   }
 
+  Future<String> getAuthorizationUrl(String providerId, {String? redirectUri}) async {
+    final token = await storage.read(key: 'access_token');
+    final Map<String, dynamic> body = {
+      "provider_id": providerId,
+    };
+    if (redirectUri != null) {
+      body["redirect_uri"] = redirectUri;
+    }
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/oauth/authorize'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 200) {
+      // Backend returns the URL string directly in the body
+      return response.body;
+    } else {
+      throw Exception('Failed to get authorization URL. Status: ${response.statusCode}, Body: ${response.body}');
+    }
+  }
+
+  Future<ExternalToolConnectionDTO> handleOAuthCallback(String providerId, String code, {String? state}) async {
+    final token = await storage.read(key: 'access_token');
+    final Map<String, dynamic> body = {
+      "provider_id": providerId,
+      "code": code,
+    };
+    if (state != null) {
+      body["state"] = state;
+    }
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/oauth/callback'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 200) {
+      return ExternalToolConnectionDTO.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Failed to handle OAuth callback. Status: ${response.statusCode}, Body: ${response.body}');
+    }
+  }
+
   // Obtener conexiones de usuario
   Future<List<ExternalToolConnectionDTO>> getUserConnections() async {
     final token = await storage.read(key: 'access_token');

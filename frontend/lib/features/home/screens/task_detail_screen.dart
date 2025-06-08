@@ -14,6 +14,7 @@ class TaskDetailScreen extends StatefulWidget {
 }
 
 class _TaskDetailScreenState extends State<TaskDetailScreen> {
+  final ProjectService _service = ProjectService(); // Added service instance
   TaskDTO? _task;
   bool _loading = true;
   String? _error;
@@ -35,10 +36,10 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     });
     try {
       if (widget.taskId == null || widget.projectId == null) throw Exception('ID de tarea o proyecto no proporcionado');
-      final task = await ProjectService().getProjectTasks(widget.projectId!);
-      final found = task.firstWhere((t) => t.id == widget.taskId, orElse: () => throw Exception('Tarea no encontrada'));
+      // Use the new getTaskDetails method
+      final taskDetails = await _service.getTaskDetails(widget.projectId!, widget.taskId!);
       setState(() {
-        _task = found;
+        _task = taskDetails;
       });
     } catch (e) {
       setState(() {

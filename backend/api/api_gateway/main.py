@@ -15,6 +15,13 @@ from api.api_gateway.utils.service_registry import service_registry
 # Load environment variables
 load_dotenv()
 
+MAX_REQUEST_BODY_SIZE = 1 * 1024 * 1024  # 1MB
+EXCLUDED_HEADERS = {
+    "host", "connection", "keep-alive", "proxy-authenticate",
+    "proxy-authorization", "te", "trailers", "transfer-encoding", "upgrade",
+    "content-length",
+}
+
 # Create FastAPI app
 app = FastAPI(
     title="TaskHub API Gateway",
@@ -89,24 +96,38 @@ async def forward_request(
     Returns:
         JSONResponse: Response from service
     """
-    # Get request body
-    body = await request.body()
+    # Filter headers
+    temp_headers = {}
+    for name, value in request.headers.items():
+        if name.lower() not in EXCLUDED_HEADERS:
+            temp_headers[name] = value
 
-    # Get request headers
-    headers = dict(request.headers)
-
-    # Add user ID to headers if available
     if hasattr(request.state, "user_id"):
-        headers["X-User-ID"] = request.state.user_id
+        temp_headers["X-User-ID"] = str(request.state.user_id)
+
+    # Prepare arguments for circuit_breaker.call_service
+    request_body = await request.body()
+
+    if len(request_body) > MAX_REQUEST_BODY_SIZE:
+        return JSONResponse(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            content={"detail": f"Request body exceeds maximum allowed size of {MAX_REQUEST_BODY_SIZE} bytes."}
+        )
+
+    service_kwargs = {
+        "headers": temp_headers,
+        "params": dict(request.query_params)
+    }
+
+    if request.method.upper() not in ("GET", "HEAD", "DELETE"):
+        service_kwargs["content"] = request_body
 
     # Forward request to service using circuit breaker
     response = await circuit_breaker.call_service(  # type: ignore
         service_name=service_name,
         url=target_url,
         method=request.method,
-        headers=headers,
-        content=body,
-        params=dict(request.query_params),
+        **service_kwargs
     )
 
     # Return response

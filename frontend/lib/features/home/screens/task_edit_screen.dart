@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart'; // For date formatting
 import '../../../core/constants/colors.dart';
 import '../../home/data/project_service.dart';
 import '../../home/data/project_models.dart';
@@ -19,10 +20,28 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
   late TextEditingController _descriptionController;
   late TextEditingController _assigneeController;
   late TextEditingController _dueDateController;
-  late TextEditingController _priorityController;
-  late TextEditingController _statusController;
+  // Removed _priorityController and _statusController
+
+  late String _priority;
+  late String _status;
+
   bool _isLoading = false;
   String? _error;
+
+  // Maps for dropdown values and display names
+  final Map<String, String> _priorityOptions = {
+    'low': 'Baja',
+    'medium': 'Media',
+    'high': 'Alta',
+    'urgent': 'Urgente',
+  };
+
+  final Map<String, String> _statusOptions = {
+    'todo': 'Por hacer',
+    'in_progress': 'En progreso',
+    'review': 'En revisión',
+    'done': 'Hecho',
+  };
 
   @override
   void initState() {
@@ -30,9 +49,14 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
     _titleController = TextEditingController(text: widget.task.title);
     _descriptionController = TextEditingController(text: widget.task.description ?? '');
     _assigneeController = TextEditingController(text: widget.task.assigneeId ?? '');
-    _dueDateController = TextEditingController(text: widget.task.dueDate?.toString() ?? '');
-    _priorityController = TextEditingController(text: widget.task.priority);
-    _statusController = TextEditingController(text: widget.task.status);
+    // Initialize DueDateController with formatted date or empty
+    _dueDateController = TextEditingController(
+        text: widget.task.dueDate != null
+            ? DateFormat('yyyy-MM-dd').format(widget.task.dueDate!)
+            : '');
+    // Initialize state variables for priority and status
+    _priority = widget.task.priority;
+    _status = widget.task.status;
   }
 
   @override
@@ -41,8 +65,7 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
     _descriptionController.dispose();
     _assigneeController.dispose();
     _dueDateController.dispose();
-    _priorityController.dispose();
-    _statusController.dispose();
+    // Removed _priorityController.dispose() and _statusController.dispose();
     super.dispose();
   }
 
@@ -53,15 +76,31 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
         _error = null;
       });
       try {
+        DateTime? dueDate;
+        if (_dueDateController.text.isNotEmpty) {
+          try {
+            dueDate = DateFormat('yyyy-MM-dd').parse(_dueDateController.text);
+          } catch (e) {
+            // Handle parsing error if needed, though DatePicker should prevent this
+            if (mounted) {
+              setState(() {
+                _error = 'Formato de fecha inválido.';
+                _isLoading = false;
+              });
+            }
+            return;
+          }
+        }
+
         await ProjectService().updateTask(
           projectId: widget.projectId,
           taskId: widget.task.id,
           title: _titleController.text,
-          description: _descriptionController.text,
+          description: _descriptionController.text.isNotEmpty ? _descriptionController.text : null,
           assigneeId: _assigneeController.text.isNotEmpty ? _assigneeController.text : null,
-          dueDate: _dueDateController.text.isNotEmpty ? DateTime.tryParse(_dueDateController.text) : null,
-          priority: _priorityController.text,
-          status: _statusController.text,
+          dueDate: dueDate,
+          priority: _priority, // Use state variable
+          status: _status,   // Use state variable
         );
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -81,6 +120,26 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
           _isLoading = false;
         });
       }
+    }
+  }
+
+  Future<void> _selectDueDate(BuildContext context) async {
+    DateTime initialDate = DateTime.now();
+    if (_dueDateController.text.isNotEmpty) {
+      try {
+        initialDate = DateFormat('yyyy-MM-dd').parse(_dueDateController.text);
+      } catch (e) { /* Use DateTime.now() if parsing fails */ }
+    }
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null) {
+      setState(() {
+        _dueDateController.text = DateFormat('yyyy-MM-dd').format(picked);
+      });
     }
   }
 
@@ -104,34 +163,79 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
             children: [
               TextFormField(
                 controller: _titleController,
-                decoration: const InputDecoration(labelText: 'Título'),
+                decoration: const InputDecoration(labelText: 'Título', prefixIcon: Icon(Icons.title)),
                 validator: (v) => v == null || v.isEmpty ? 'Requerido' : null,
               ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _descriptionController,
-                decoration: const InputDecoration(labelText: 'Descripción'),
+                decoration: const InputDecoration(labelText: 'Descripción', prefixIcon: Icon(Icons.description)),
+                maxLines: 3,
               ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _assigneeController,
-                decoration: const InputDecoration(labelText: 'ID Asignado'),
+                decoration: const InputDecoration(labelText: 'ID Asignado', prefixIcon: Icon(Icons.person_outline)),
               ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _dueDateController,
-                decoration: const InputDecoration(labelText: 'Fecha de vencimiento (YYYY-MM-DD)'),
+                decoration: const InputDecoration(
+                  labelText: 'Fecha de vencimiento',
+                  prefixIcon: Icon(Icons.calendar_today),
+                ),
+                readOnly: true,
+                onTap: () => _selectDueDate(context),
               ),
-              TextFormField(
-                controller: _priorityController,
-                decoration: const InputDecoration(labelText: 'Prioridad'),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: _priority,
+                decoration: const InputDecoration(labelText: 'Prioridad', prefixIcon: Icon(Icons.priority_high)),
+                items: _priorityOptions.entries.map((entry) {
+                  return DropdownMenuItem<String>(
+                    value: entry.key,
+                    child: Text(entry.value),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  if (newValue != null) {
+                    setState(() {
+                      _priority = newValue;
+                    });
+                  }
+                },
+                validator: (value) => value == null || value.isEmpty ? 'Selecciona una prioridad' : null,
               ),
-              TextFormField(
-                controller: _statusController,
-                decoration: const InputDecoration(labelText: 'Estado'),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: _status,
+                decoration: const InputDecoration(labelText: 'Estado', prefixIcon: Icon(Icons.task_alt)),
+                items: _statusOptions.entries.map((entry) {
+                  return DropdownMenuItem<String>(
+                    value: entry.key,
+                    child: Text(entry.value),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  if (newValue != null) {
+                    setState(() {
+                      _status = newValue;
+                    });
+                  }
+                },
+                validator: (value) => value == null || value.isEmpty ? 'Selecciona un estado' : null,
               ),
               const SizedBox(height: 24),
               ElevatedButton.icon(
                 onPressed: _isLoading ? null : _save,
                 icon: const Icon(Icons.save),
-                label: const Text('Guardar cambios'),
+                label: Text(_isLoading ? 'Guardando...' : 'Guardar cambios'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.textOnPrimary,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  textStyle: const TextStyle(fontSize: 16)
+                ),
               ),
               if (_error != null) ...[
                 const SizedBox(height: 12),

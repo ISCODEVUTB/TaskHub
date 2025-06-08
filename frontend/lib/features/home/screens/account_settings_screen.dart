@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/colors.dart';
 import '../../../theme/theme_provider.dart';
+import '../../auth/data/auth_service.dart'; // Added import
 
 class AccountSettingsPage extends StatelessWidget {
   const AccountSettingsPage({super.key});
@@ -54,9 +55,13 @@ class AccountSettingsPage extends StatelessWidget {
                   leading: const Icon(Icons.logout, color: AppColors.error),
                   title: const Text('Cerrar sesión'),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
+                  onTap: () async { // Made async
                     Feedback.forTap(context);
-                    context.go('/login');
+                    final authService = Provider.of<AuthService>(context, listen: false);
+                    await authService.signOut();
+                    if (context.mounted) {
+                      context.go('/login');
+                    }
                   },
                 ),
                 Divider(color: Theme.of(context).dividerColor),

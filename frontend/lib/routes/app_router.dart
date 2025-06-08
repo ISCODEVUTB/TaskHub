@@ -325,9 +325,12 @@ class AppRouter {
             ),
           ),
           GoRoute(
-            path: '/document/:id',
+            path: '/project/:projectId/document/:id',
             pageBuilder: (context, state) => CustomTransitionPage(
-              child: DocumentDetailScreen(documentId: state.pathParameters['id']),
+              child: DocumentDetailScreen(
+                documentId: state.pathParameters['id']!,
+                projectId: state.pathParameters['projectId']!,
+              ),
               transitionsBuilder: (context, animation, secondaryAnimation, child) =>
                 FadeTransition(opacity: animation, child: child),
             ),
@@ -339,17 +342,6 @@ class AppRouter {
               transitionsBuilder: (context, animation, secondaryAnimation, child) =>
                 FadeTransition(opacity: animation, child: child),
             ),
-          ),
-          GoRoute(
-            path: '/dev-bypass',
-            builder: (context, state) {
-              // Simula un token válido y navega al dashboard
-              AuthService().storage.write(key: 'access_token', value: 'TOKEN_VALIDO_AQUI');
-              Future.microtask(() => context.go('/dashboard'));
-              return const Scaffold(
-                body: Center(child: CircularProgressIndicator()),
-              );
-            },
           ),
         ],
       ),
