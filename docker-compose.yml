@@ -17,7 +17,7 @@ services:
       - DOCUMENT_SERVICE_URL=http://document_service:8003
       - NOTIFICATION_SERVICE_URL=http://notification_service:8004
       - EXTERNAL_TOOLS_SERVICE_URL=http://external_tools_service:8005
-      - DATABASE_URL=postgresql://postgres:Adminqwert1234db@db.bhpkrxaqmlnyoxmcxxth.supabase.co:5432/postgres
+      - DATABASE_URL=${DATABASE_URL}
       - JWT_ALGORITHM=HS256
       - ACCESS_TOKEN_EXPIRE_MINUTES=30
       - REFRESH_TOKEN_EXPIRE_DAYS=7
@@ -45,7 +45,7 @@ services:
     env_file:
       - ./backend/.env
     environment:
-      - DATABASE_URL=postgresql://postgres:Adminqwert1234db@db.bhpkrxaqmlnyoxmcxxth.supabase.co:5432/postgres
+      - DATABASE_URL=${DATABASE_URL}
       - JWT_ALGORITHM=HS256
       - ACCESS_TOKEN_EXPIRE_MINUTES=30
       - REFRESH_TOKEN_EXPIRE_DAYS=7
@@ -69,7 +69,7 @@ services:
     env_file:
       - ./backend/.env
     environment:
-      - DATABASE_URL=postgresql://postgres:Adminqwert1234db@db.bhpkrxaqmlnyoxmcxxth.supabase.co:5432/postgres
+      - DATABASE_URL=${DATABASE_URL}
       - JWT_ALGORITHM=HS256
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
@@ -95,7 +95,7 @@ services:
     env_file:
       - ./backend/.env
     environment:
-      - DATABASE_URL=postgresql://postgres:Adminqwert1234db@db.bhpkrxaqmlnyoxmcxxth.supabase.co:5432/postgres
+      - DATABASE_URL=${DATABASE_URL}
       - JWT_ALGORITHM=HS256
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
@@ -121,7 +121,7 @@ services:
     env_file:
       - ./backend/.env
     environment:
-      - DATABASE_URL=postgresql://postgres:Adminqwert1234db@db.bhpkrxaqmlnyoxmcxxth.supabase.co:5432/postgres
+      - DATABASE_URL=${DATABASE_URL}
       - JWT_ALGORITHM=HS256
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
@@ -147,7 +147,7 @@ services:
     env_file:
       - ./backend/.env
     environment:
-      - DATABASE_URL=postgresql://postgres:Adminqwert1234db@db.bhpkrxaqmlnyoxmcxxth.supabase.co:5432/postgres
+      - DATABASE_URL=${DATABASE_URL}
       - JWT_ALGORITHM=HS256
       - RABBITMQ_HOST=rabbitmq
       - RABBITMQ_PORT=5672
