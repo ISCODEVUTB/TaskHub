@@ -16,6 +16,22 @@ Once the services are executing, u can acced them:
 - Document Service: `http://localhost:8003/docs`
 - Notification Service: `http://localhost:8004/docs`
 - External Tools Service: `http://localhost:8005/docs`
+
+## Documentation
+
+For detailed information about the project, please refer to the following documentation:
+
+- [Project Status Report](docs/TaskHub%20Project%20Status%20Report.md) - Current state of features, known issues, and pending work
+- [Developer Manual](docs/TaskHub%20Developer%20Manual.md) - Technical documentation for developers
+- [API Documentation](docs/TaskHub%20API%20Doc.md) - Detailed API endpoints documentation
+
+These documents provide comprehensive information about:
+- Implementation status and roadmap
+- System architecture and design patterns
+- Development setup and guidelines
+- API specifications and usage
+- Contribution workflows
+
 ## Project Structure
 
 taskhub/
@@ -270,4 +286,6 @@ The application can be deployed to various cloud providers:
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
+
+You can find more information about this license at <https://www.gnu.org/licenses/gpl-3.0.html>
