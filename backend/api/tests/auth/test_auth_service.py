@@ -65,7 +65,7 @@ def test_get_user_profile_success(auth_service: AuthService) -> None:
     mock_user = MagicMock()
     mock_user.id = 'user123'
     mock_user.email = 'test@example.com'
-    mock_user.user_metadata = {'full_name': 'Test User', 'company_name': 'TestCo'}
+    mock_user.user_meta_data = {'full_name': 'Test User', 'company_name': 'TestCo'}
     mock_user.created_at = datetime.now(timezone.utc).isoformat()
     mock_user.updated_at = datetime.now(timezone.utc).isoformat()
     with patch.object(auth_service.supabase_manager, 'get_user', return_value=MagicMock(user=mock_user)):

@@ -5,9 +5,10 @@ from sqlalchemy import (
     ForeignKey,
     String,
     Text,
+    func,
 )
-from sqlalchemy.orm import relationship
-from typing import TYPE_CHECKING
+from sqlalchemy.orm import relationship, Mapped, mapped_column
+from typing import TYPE_CHECKING, Optional, List
 
 from .base import BaseModel
 
@@ -24,18 +25,18 @@ class Project(BaseModel):
 
     name = Column(String, nullable=False)
     description = Column(Text, nullable=True)
-    start_date = Column(DateTime, nullable=True)
-    end_date = Column(DateTime, nullable=True)
-    status = Column(String, nullable=False, default="planning")
-    owner_id = Column(String, ForeignKey("users.id"), nullable=False)
+    owner_id = Column(String, ForeignKey("auth.users.id", ondelete="CASCADE"), nullable=False)
+    status = Column(String, nullable=False, server_default="planning")
+    start_date = Column(DateTime(timezone=True), nullable=True)
+    end_date = Column(DateTime(timezone=True), nullable=True)
     tags = Column(JSON, nullable=True)
     meta_data = Column(JSON, nullable=True)
 
     # Relationships
-    members = relationship("ProjectMember", back_populates="project")
-    tasks = relationship("Task", back_populates="project")
-    documents = relationship("Document", back_populates="project")
-    activity_logs = relationship("ActivityLog", back_populates="project")
+    members = relationship("ProjectMember", back_populates="project", cascade="all, delete-orphan")
+    tasks = relationship("Task", back_populates="project", cascade="all, delete-orphan")
+    documents = relationship("Document", back_populates="project", cascade="all, delete-orphan")
+    activity_logs = relationship("ActivityLog", back_populates="project", cascade="all, delete-orphan")
 
 
 class ProjectMember(BaseModel):
@@ -43,12 +44,12 @@ class ProjectMember(BaseModel):
 
     __tablename__ = "project_members"
 
-    project_id = Column(String, ForeignKey("projects.id"), nullable=False)
-    user_id = Column(String, ForeignKey("users.id"), nullable=False)
+    project_id = Column(String, ForeignKey("projects.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(String, ForeignKey("auth.users.id", ondelete="CASCADE"), nullable=False)
     role = Column(
-        String, nullable=False, default="member"
+        String, nullable=False, server_default="member"
     )  # 'owner', 'admin', 'member'
-    joined_at = Column(DateTime, nullable=False)
+    joined_at = Column(DateTime(timezone=True), nullable=False, server_default="CURRENT_TIMESTAMP")
 
     # Relationships
     project = relationship("Project", back_populates="members")
@@ -60,30 +61,88 @@ class Task(BaseModel):
 
     __tablename__ = "tasks"
 
-    title = Column(String, nullable=False)
-    description = Column(Text, nullable=True)
-    project_id = Column(String, ForeignKey("projects.id"), nullable=False)
-    creator_id = Column(String, ForeignKey("users.id"), nullable=False)
-    assignee_id = Column(String, ForeignKey("users.id"), nullable=True)
-    due_date = Column(DateTime, nullable=True)
+    title = Column(
+        String,
+        nullable=False,
+        comment="Task title, 3-100 characters"
+    )
+    description = Column(
+        Text,
+        nullable=True,
+        comment="Detailed task description"
+    )
+    project_id = Column(
+        String,
+        ForeignKey("projects.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+    creator_id = Column(
+        String,
+        ForeignKey("auth.users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+    assignee_id = Column(
+        String,
+        ForeignKey("auth.users.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True
+    )
+    due_date = Column(
+        DateTime(timezone=True),
+        nullable=True,
+        index=True
+    )
     priority = Column(
-        String, nullable=False, default="medium"
-    )  # 'low', 'medium', 'high', 'urgent'
+        String,
+        nullable=False,
+        server_default="'medium'",
+        comment="'low', 'medium', 'high'",
+        index=True
+    )
     status = Column(
-        String, nullable=False, default="todo"
-    )  # 'todo', 'in_progress', 'review', 'done'
-    tags = Column(JSON, nullable=True)
-    meta_data = Column(JSON, nullable=True)
+        String,
+        nullable=False,
+        server_default="'todo'",
+        comment="'todo', 'in_progress', 'review', 'done'",
+        index=True
+    )
+    tags = Column(
+        JSON,
+        nullable=True,
+        comment="List of tags for categorization"
+    )
+    meta_data = Column(
+        JSON,
+        nullable=True,
+        comment="Additional task metadata"
+    )
 
     # Relationships
-    project = relationship("Project", back_populates="tasks")
+    project = relationship(
+        "Project",
+        back_populates="tasks",
+        passive_deletes=True
+    )
     creator = relationship(
-        "User", foreign_keys=[creator_id], back_populates="tasks_created"
+        "User",
+        foreign_keys=[creator_id],
+        back_populates="tasks_created",
+        passive_deletes=True
     )
     assignee = relationship(
-        "User", foreign_keys=[assignee_id], back_populates="tasks_assigned"
+        "User",
+        foreign_keys=[assignee_id],
+        back_populates="tasks_assigned",
+        passive_deletes=True
     )
-    comments = relationship("TaskComment", back_populates="task")
+    comments = relationship(
+        "TaskComment",
+        back_populates="task",
+        cascade="all, delete-orphan",
+        order_by="TaskComment.created_at.desc()"
+    )
 
 
 class TaskComment(BaseModel):
@@ -91,15 +150,49 @@ class TaskComment(BaseModel):
 
     __tablename__ = "task_comments"
 
-    task_id = Column(String, ForeignKey("tasks.id"), nullable=False)
-    user_id = Column(String, ForeignKey("users.id"), nullable=False)
-    content = Column(Text, nullable=False)
-    parent_id = Column(String, ForeignKey("task_comments.id"), nullable=True)
+    task_id: Mapped[str] = mapped_column(
+        ForeignKey("tasks.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+    
+    user_id: Mapped[str] = mapped_column(
+        ForeignKey("auth.users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+    
+    content: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+        comment="Comment content"
+    )
+    
+    parent_id: Mapped[Optional[str]] = mapped_column(
+        ForeignKey("task_comments.id", ondelete="CASCADE"),
+        nullable=True,
+        index=True,
+        comment="Parent comment ID for replies"
+    )
 
     # Relationships
-    task = relationship("Task", back_populates="comments")
-    parent = relationship(
-        "TaskComment", remote_side="TaskComment.id", backref="replies"
+    task: Mapped["Task"] = relationship(
+        "Task",
+        back_populates="comments",
+        passive_deletes=True
+    )
+    
+    parent: Mapped[Optional["TaskComment"]] = relationship(
+        "TaskComment",
+        back_populates="replies",
+        remote_side=[id]
+    )
+    
+    replies: Mapped[List["TaskComment"]] = relationship(
+        "TaskComment",
+        back_populates="parent",
+        order_by="TaskComment.created_at.asc()",
+        cascade="all, delete-orphan"
     )
 
 
@@ -108,13 +201,60 @@ class ActivityLog(BaseModel):
 
     __tablename__ = "activity_logs"
 
-    project_id = Column(String, ForeignKey("projects.id"), nullable=False)
-    user_id = Column(String, ForeignKey("users.id"), nullable=False)
-    action = Column(String, nullable=False)
-    entity_type = Column(String, nullable=False)  # 'project', 'task', 'document', etc.
-    entity_id = Column(String, nullable=False)
-    details = Column(JSON, nullable=True)
+    project_id = Column(
+        String,
+        ForeignKey("projects.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+    user_id = Column(
+        String,
+        ForeignKey("auth.users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+    action = Column(
+        String,
+        nullable=False,
+        index=True,
+        comment="Action performed (create, update, delete, etc.)"
+    )
+    entity_type = Column(
+        String,
+        nullable=True,
+        index=True,
+        comment="Type of entity affected (project, task, etc.)"
+    )
+    entity_id = Column(
+        String,
+        nullable=True,
+        index=True,
+        comment="ID of affected entity"
+    )
+    details = Column(
+        JSON,
+        nullable=True,
+        comment="Additional action details"
+    )
+    ip_address = Column(
+        String,
+        nullable=True,
+        comment="Client IP address"
+    )
+    user_agent = Column(
+        Text,
+        nullable=True,
+        comment="Client user agent"
+    )
 
     # Relationships
-    project = relationship("Project", back_populates="activity_logs")
-    user = relationship("User", back_populates="activity_logs")
+    project = relationship(
+        "Project",
+        back_populates="activity_logs",
+        passive_deletes=True
+    )
+    user = relationship(
+        "User",
+        back_populates="activity_logs",
+        passive_deletes=True
+    )

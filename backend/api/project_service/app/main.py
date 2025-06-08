@@ -562,7 +562,7 @@ async def assign_task(
         priority=task.priority,
         status=task.status,
         tags=list(task.tags) if task.tags is not None else [],
-        meta_data=(task.metadata or {}),
+        meta_data=(task.meta_data or {}),
         created_at=task.created_at,
         updated_at=task.updated_at,
     )
@@ -628,7 +628,7 @@ async def change_task_status(
         priority=task.priority,
         status=task.status,
         tags=list(task.tags) if task.tags is not None else [],
-        metadata=(task.metadata or {}),
+        meta_data=(task.meta_data or {}),
         created_at=task.created_at,
         updated_at=task.updated_at,
     )
@@ -690,7 +690,7 @@ async def undo_task_command(
             priority=task.priority,
             status=task.status,
             tags=list(task.tags) if task.tags is not None else [],
-            metadata=(task.metadata or {}),
+            meta_data=(task.meta_data or {}),
             created_at=task.created_at,
             updated_at=task.updated_at,
         )
@@ -754,7 +754,7 @@ async def redo_task_command(
             priority=task.priority,
             status=task.status,
             tags=list(task.tags) if task.tags is not None else [],
-            metadata=(task.metadata or {}),
+            meta_data=(task.meta_data or {}),
             created_at=task.created_at,
             updated_at=task.updated_at,
         )

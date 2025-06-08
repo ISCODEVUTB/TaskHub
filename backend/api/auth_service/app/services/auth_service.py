@@ -36,15 +36,15 @@ class AuthService:
             EmailAlreadyExistsException: If email already exists
         """
         try:
-            # Create user metadata
-            user_metadata = {
+            # Create user meta_data
+            user_meta_data = {
                 "full_name": user_data.full_name,
                 "company_name": user_data.company_name,
             }
 
             # Sign up user in Supabase
             response = self.supabase_manager.sign_up(
-                user_data.email, user_data.password, user_metadata
+                user_data.email, user_data.password, user_meta_data
             )
 
             if not response.session:
@@ -159,9 +159,9 @@ class AuthService:
             response = self.supabase_manager.get_user(token)
             user = response.user # This is a User object from supabase-py
 
-            user_metadata = getattr(user, "user_metadata", {}) or {}
-            if not isinstance(user_metadata, dict):
-                user_metadata = {}
+            user_meta_data = getattr(user, "user_meta_data", {}) or {}
+            if not isinstance(user_meta_data, dict):
+                user_meta_data = {}
 
             # Helper to handle datetime conversion robustly
             def _to_datetime(timestamp_val):
@@ -205,8 +205,8 @@ class AuthService:
             return UserProfileDTO(
                 id=user.id,
                 email=user.email,
-                full_name=user_metadata.get("full_name", ""),
-                company_name=user_metadata.get("company_name", ""),
+                full_name=user_meta_data.get("full_name", ""),
+                company_name=user_meta_data.get("company_name", ""),
                 role="user", # Default role
                 created_at=created_at_dt,
                 updated_at=updated_at_dt,

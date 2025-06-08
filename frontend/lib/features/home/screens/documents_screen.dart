@@ -5,6 +5,8 @@ import '../../../core/constants/colors.dart';
 import '../../../core/widgets/section_card.dart';
 import '../../home/data/document_service.dart';
 import '../../home/data/document_models.dart';
+import '../../home/data/project_service.dart';
+import '../../home/data/project_models.dart';
 
 class DocumentsPage extends StatefulWidget {
   const DocumentsPage({super.key});
@@ -15,6 +17,8 @@ class DocumentsPage extends StatefulWidget {
 
 class _DocumentsPageState extends State<DocumentsPage> {
   final TextEditingController _searchController = TextEditingController();
+  final DocumentService _documentService = DocumentService();
+  final ProjectService _projectService = ProjectService();
   List<DocumentDTO> _documents = [];
   bool _loading = true;
   String? _error;
@@ -31,11 +35,24 @@ class _DocumentsPageState extends State<DocumentsPage> {
       _error = null;
     });
     try {
-      // Aquí deberías obtener el projectId real según el contexto de tu app
-      final projectId = 'demo_project_id';
-      final docs = await DocumentService().getProjectDocuments(projectId);
+      // Obtener todos los proyectos
+      final projects = await _projectService.getProjects();
+
+      // Obtener documentos de cada proyecto
+      List<DocumentDTO> allDocuments = [];
+
+      for (var project in projects) {
+        try {
+          final docs = await _documentService.getProjectDocuments(project.id);
+          allDocuments.addAll(docs);
+        } catch (e) {
+          print('Error al obtener documentos del proyecto ${project.id}: $e');
+          // Continuamos con el siguiente proyecto incluso si hay error
+        }
+      }
+
       setState(() {
-        _documents = docs;
+        _documents = allDocuments;
       });
     } catch (e) {
       setState(() {
@@ -75,64 +92,76 @@ class _DocumentsPageState extends State<DocumentsPage> {
           },
         ),
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
+      body:
+          _loading
+              ? const Center(child: CircularProgressIndicator())
+              : _error != null
               ? Center(child: Text('Error: $_error'))
               : _documents.isEmpty
-                  ? const Center(child: Text('No hay documentos'))
-                  : ListView.separated(
-                      padding: const EdgeInsets.all(24.0),
-                      itemCount: _documents.length,
-                      separatorBuilder: (context, index) => Divider(height: 24, color: Theme.of(context).dividerColor),
-                      itemBuilder: (context, index) {
-                        final doc = _documents[index];
-                        return Card(
-                          elevation: 2,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: AppColors.secondary.withAlpha(38),
-                              child: Icon(
-                                doc.type == 'folder'
-                                    ? Icons.folder
-                                    : doc.type == 'link'
-                                        ? Icons.link
-                                        : Icons.insert_drive_file,
-                                color: AppColors.secondary,
-                              ),
-                            ),
-                            title: Text(
-                              doc.name,
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                            ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (doc.description != null) Text(doc.description!),
-                                Text('Tipo: ${doc.type}'),
-                                if (doc.tags != null && doc.tags!.isNotEmpty) Text('Tags: ${doc.tags!.join(", ")}'),
-                                Text('Creado: ${doc.createdAt}'),
-                              ],
-                            ),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.download, color: AppColors.primary),
-                              tooltip: 'Descargar documento',
-                              onPressed: () {
-                                Feedback.forTap(context);
-                                // Acción de descarga aquí
-                              },
-                            ),
-                            onTap: () {
-                              Feedback.forTap(context);
-                              context.go('/project/${doc.projectId}/document/${doc.id}');
-                            },
-                          ),
+              ? const Center(child: Text('No hay documentos'))
+              : ListView.separated(
+                padding: const EdgeInsets.all(24.0),
+                itemCount: _documents.length,
+                separatorBuilder:
+                    (context, index) => Divider(
+                      height: 24,
+                      color: Theme.of(context).dividerColor,
+                    ),
+                itemBuilder: (context, index) {
+                  final doc = _documents[index];
+                  return Card(
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: AppColors.secondary.withAlpha(38),
+                        child: Icon(
+                          doc.type == 'folder'
+                              ? Icons.folder
+                              : doc.type == 'link'
+                              ? Icons.link
+                              : Icons.insert_drive_file,
+                          color: AppColors.secondary,
+                        ),
+                      ),
+                      title: Text(
+                        doc.name,
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (doc.description != null) Text(doc.description!),
+                          Text('Tipo: ${doc.type}'),
+                          if (doc.tags != null && doc.tags!.isNotEmpty)
+                            Text('Tags: ${doc.tags!.join(", ")}'),
+                          Text('Creado: ${doc.createdAt}'),
+                        ],
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(
+                          Icons.download,
+                          color: AppColors.primary,
+                        ),
+                        tooltip: 'Descargar documento',
+                        onPressed: () {
+                          Feedback.forTap(context);
+                          // Acción de descarga aquí
+                        },
+                      ),
+                      onTap: () {
+                        Feedback.forTap(context);
+                        context.go(
+                          '/project/${doc.projectId}/document/${doc.id}',
                         );
                       },
                     ),
+                  );
+                },
+              ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.go('/create-document'),
         tooltip: 'Crear documento',

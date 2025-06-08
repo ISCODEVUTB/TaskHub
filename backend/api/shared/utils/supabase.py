@@ -71,7 +71,7 @@ class SupabaseManager:
         return self.client.table(table_name)
 
     def sign_up(
-        self, email: str, password: str, user_metadata: Optional[Dict[str, Any]] = None
+        self, email: str, password: str, user_meta_data: Optional[Dict[str, Any]] = None
     ) -> Any:
         """
         Sign up a new user.
@@ -79,13 +79,13 @@ class SupabaseManager:
         Args:
             email (str): User email
             password (str): User password
-            user_metadata (Dict[str, Any], optional): User metadata
+            user_meta_data (Dict[str, Any], optional): User meta_data
 
         Returns:
             Dict: Supabase auth response
         """
         return self.auth().sign_up(
-            {"email": email, "password": password, "options": {"data": user_metadata}}
+            {"email": email, "password": password, "options": {"data": user_meta_data}}
         )
 
     def sign_in(self, email: str, password: str) -> Any:

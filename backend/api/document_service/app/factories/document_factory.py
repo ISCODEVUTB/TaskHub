@@ -34,7 +34,7 @@ class DocumentFactory:
             url (Optional[str], optional): URL. Defaults to None.
             description (Optional[str], optional): Description. Defaults to None.
             tags (Optional[List[str]], optional): Tags. Defaults to None.
-            meta_data (Optional[Dict[str, Any]], optional): Metadata. Defaults to None.
+            meta_data (Optional[Dict[str, Any]], optional): meta_data. Defaults to None.
 
         Returns:
             Document: Created document
@@ -108,7 +108,7 @@ class DocumentFactory:
             url (Optional[str], optional): URL. Defaults to None.
             description (Optional[str], optional): Description. Defaults to None.
             tags (Optional[List[str]], optional): Tags. Defaults to None.
-            meta_data (Optional[Dict[str, Any]], optional): Metadata. Defaults to None.
+            meta_data (Optional[Dict[str, Any]], optional): meta_data. Defaults to None.
 
         Returns:
             Document: Created document
@@ -147,7 +147,7 @@ class DocumentFactory:
             parent_id (Optional[str], optional): Parent document ID. Defaults to None.
             description (Optional[str], optional): Description. Defaults to None.
             tags (Optional[List[str]], optional): Tags. Defaults to None.
-            meta_data (Optional[Dict[str, Any]], optional): Metadata. Defaults to None.
+            meta_data (Optional[Dict[str, Any]], optional): meta_data. Defaults to None.
 
         Returns:
             Document: Created document
@@ -186,7 +186,7 @@ class DocumentFactory:
             parent_id (Optional[str], optional): Parent document ID. Defaults to None.
             description (Optional[str], optional): Description. Defaults to None.
             tags (Optional[List[str]], optional): Tags. Defaults to None.
-            meta_data (Optional[Dict[str, Any]], optional): Metadata. Defaults to None.
+            meta_data (Optional[Dict[str, Any]], optional): meta_data. Defaults to None.
 
         Returns:
             Document: Created document

@@ -42,7 +42,7 @@ class ProjectCreateDTO(BaseModel):
     end_date: Optional[datetime] = None
     status: ProjectStatus = ProjectStatus.PLANNING
     tags: Optional[List[str]] = None
-    metadata: Optional[Dict[str, Any]] = None
+    meta_data: Optional[Dict[str, Any]] = None
 
 
 class ProjectUpdateDTO(BaseModel):
@@ -54,7 +54,7 @@ class ProjectUpdateDTO(BaseModel):
     end_date: Optional[datetime] = None
     status: Optional[ProjectStatus] = None
     tags: Optional[List[str]] = None
-    metadata: Optional[Dict[str, Any]] = None
+    meta_data: Optional[Dict[str, Any]] = None
 
 
 class ProjectResponseDTO(BaseModel):
@@ -68,7 +68,7 @@ class ProjectResponseDTO(BaseModel):
     status: ProjectStatus
     owner_id: str
     tags: Optional[List[str]] = None
-    metadata: Optional[Dict[str, Any]] = None
+    meta_data: Optional[Dict[str, Any]] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
 
@@ -84,7 +84,7 @@ class TaskCreateDTO(BaseModel):
     priority: TaskPriority = TaskPriority.MEDIUM
     status: TaskStatus = TaskStatus.TODO
     tags: Optional[List[str]] = None
-    metadata: Optional[Dict[str, Any]] = None
+    meta_data: Optional[Dict[str, Any]] = None
 
 
 class TaskUpdateDTO(BaseModel):
@@ -97,7 +97,7 @@ class TaskUpdateDTO(BaseModel):
     priority: Optional[TaskPriority] = None
     status: Optional[TaskStatus] = None
     tags: Optional[List[str]] = None
-    metadata: Optional[Dict[str, Any]] = None
+    meta_data: Optional[Dict[str, Any]] = None
 
 
 class TaskResponseDTO(BaseModel):
@@ -113,7 +113,7 @@ class TaskResponseDTO(BaseModel):
     priority: TaskPriority
     status: TaskStatus
     tags: Optional[List[str]] = None
-    metadata: Optional[Dict[str, Any]] = None
+    meta_data: Optional[Dict[str, Any]] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
 

@@ -19,6 +19,12 @@ def get_utc_now() -> datetime:
 
 
 class BaseModel(Base):
+    """Base model with common fields"""
+    __abstract__ = True
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default="CURRENT_TIMESTAMP")
+    updated_at = Column(DateTime(timezone=True), nullable=False, server_default="CURRENT_TIMESTAMP")
     """Base model with common fields for all models"""
 
     __abstract__ = True

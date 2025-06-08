@@ -362,7 +362,7 @@ This document provides details about the API endpoints for the Project Service. 
   "end_date": "<Optional[datetime]: Project end date, e.g., 2023-12-31T00:00:00Z>",
   "status": "<ProjectStatus: planning | in_progress | on_hold | completed | cancelled (default: planning)>",
   "tags": "<Optional[List[str]]: List of tags, e.g., [\"web\", \"mobile\"]>",
-  "meta_data": "<Optional[Dict[str, Any]]: Additional metadata>"
+  "meta_data": "<Optional[Dict[str, Any]]: Additional meta_data>"
 }
 ```
 
@@ -377,7 +377,7 @@ This document provides details about the API endpoints for the Project Service. 
   "status": "<ProjectStatus: Project status>",
   "owner_id": "<str: User ID of the project owner>",
   "tags": "<Optional[List[str]]: List of tags>",
-  "meta_data": "<Optional[Dict[str, Any]]: Additional metadata>",
+  "meta_data": "<Optional[Dict[str, Any]]: Additional meta_data>",
   "created_at": "<datetime: Timestamp of project creation>",
   "updated_at": "<Optional[datetime]: Timestamp of last project update>"
 }
@@ -443,7 +443,7 @@ curl -X POST "http://localhost:8000/projects" \
     "status": "<ProjectStatus: Project status>",
     "owner_id": "<str: User ID of the project owner>",
     "tags": "<Optional[List[str]]: List of tags>",
-    "meta_data": "<Optional[Dict[str, Any]]: Additional metadata>",
+    "meta_data": "<Optional[Dict[str, Any]]: Additional meta_data>",
     "created_at": "<datetime: Timestamp of project creation>",
     "updated_at": "<Optional[datetime]: Timestamp of last project update>"
   }
@@ -518,7 +518,7 @@ curl -X GET "http://localhost:8000/projects" \
   "status": "<ProjectStatus: Project status>",
   "owner_id": "<str: User ID of the project owner>",
   "tags": "<Optional[List[str]]: List of tags>",
-  "meta_data": "<Optional[Dict[str, Any]]: Additional metadata>",
+  "meta_data": "<Optional[Dict[str, Any]]: Additional meta_data>",
   "created_at": "<datetime: Timestamp of project creation>",
   "updated_at": "<Optional[datetime]: Timestamp of last project update>"
 }
@@ -572,7 +572,7 @@ curl -X GET "http://localhost:8000/projects/proj_123abc" \
   "end_date": "<Optional[datetime]: Project end date>",
   "status": "<Optional[ProjectStatus]: planning | in_progress | on_hold | completed | cancelled>",
   "tags": "<Optional[List[str]]: List of tags>",
-  "meta_data": "<Optional[Dict[str, Any]]: Additional metadata>"
+  "meta_data": "<Optional[Dict[str, Any]]: Additional meta_data>"
 }
 ```
 
@@ -892,7 +892,7 @@ curl -X DELETE "http://localhost:8000/projects/proj_123abc/members/user_def456" 
   "priority": "<TaskPriority: low | medium | high | urgent (default: medium)>",
   "status": "<TaskStatus: todo | in_progress | review | done (default: todo)>",
   "tags": "<Optional[List[str]]: List of tags>",
-  "meta_data": "<Optional[Dict[str, Any]]: Additional metadata>"
+  "meta_data": "<Optional[Dict[str, Any]]: Additional meta_data>"
 }
 ```
 
@@ -909,7 +909,7 @@ curl -X DELETE "http://localhost:8000/projects/proj_123abc/members/user_def456" 
   "priority": "<TaskPriority: Task priority>",
   "status": "<TaskStatus: Task status>",
   "tags": "<Optional[List[str]]: List of tags>",
-  "meta_data": "<Optional[Dict[str, Any]]: Additional metadata>",
+  "meta_data": "<Optional[Dict[str, Any]]: Additional meta_data>",
   "created_at": "<datetime: Timestamp of task creation>",
   "updated_at": "<Optional[datetime]: Timestamp of last task update>"
 }
@@ -1085,7 +1085,7 @@ curl -X GET "http://localhost:8000/projects/proj_123abc/tasks/task_jkl012" \
   "priority": "<Optional[TaskPriority]: low | medium | high | urgent>",
   "status": "<Optional[TaskStatus]: todo | in_progress | review | done>",
   "tags": "<Optional[List[str]]: List of tags>",
-  "meta_data": "<Optional[Dict[str, Any]]: Additional metadata>"
+  "meta_data": "<Optional[Dict[str, Any]]: Additional meta_data>"
 }
 ```
 
@@ -1627,7 +1627,7 @@ This document provides details about the API endpoints for the Document Service.
 
 ### POST /documents
 
-**Description:** Create a new document (metadata entry).
+**Description:** Create a new document (meta_data entry).
 
 **Required Headers:**
 - `Content-Type`: application/json
@@ -1650,7 +1650,7 @@ This document provides details about the API endpoints for the Document Service.
   "url": "<Optional[str]: URL for 'link' type>",
   "description": "<Optional[str]: Document description>",
   "tags": "<Optional[List[str]]: List of tags, e.g., [\"report\", \"q4\"]>",
-  "meta_data": "<Optional[Dict[str, Any]]: Additional metadata>"
+  "meta_data": "<Optional[Dict[str, Any]]: Additional meta_data>"
 }
 ```
 
@@ -1669,7 +1669,7 @@ This document provides details about the API endpoints for the Document Service.
   "version": "<int: Initial version number (e.g., 1)>",
   "creator_id": "<str: User ID of the creator>",
   "tags": "<Optional[List[str]]: List of tags>",
-  "meta_data": "<Optional[Dict[str, Any]]: Additional metadata>",
+  "meta_data": "<Optional[Dict[str, Any]]: Additional meta_data>",
   "created_at": "<datetime: Timestamp of document creation>",
   "updated_at": "<Optional[datetime]: Timestamp of last document update>"
 }
@@ -1768,7 +1768,7 @@ curl -X GET "http://localhost:8000/documents/doc_xyz789" \
 
 ### PUT /documents/{document_id}
 
-**Description:** Update a document (metadata).
+**Description:** Update a document (meta_data).
 
 **Required Headers:**
 - `Content-Type`: application/json
@@ -1787,7 +1787,7 @@ curl -X GET "http://localhost:8000/documents/doc_xyz789" \
   "parent_id": "<Optional[str]: New parent folder ID>",
   "description": "<Optional[str]: New document description>",
   "tags": "<Optional[List[str]]: New list of tags>",
-  "meta_data": "<Optional[Dict[str, Any]]: New metadata>"
+  "meta_data": "<Optional[Dict[str, Any]]: New meta_data>"
 }
 ```
 
@@ -1962,7 +1962,7 @@ curl -X GET "http://localhost:8000/projects/proj_123abc/documents?parent_id=fold
   "content_type": "<Optional[str]: MIME type of the file, e.g., 'application/pdf'>",
   "description": "<Optional[str]: Document description>",
   "tags": "<Optional[List[str]]: List of tags>",
-  "meta_data": "<Optional[Dict[str, Any]]: Additional metadata>"
+  "meta_data": "<Optional[Dict[str, Any]]: Additional meta_data>"
 }
 ```
 
@@ -2020,7 +2020,7 @@ curl -X POST "http://localhost:8000/documents/upload" \
 
 ### POST /documents/{document_id}/versions
 
-**Description:** Create a new document version (metadata). This endpoint registers a new version with content type and changes description. The actual file content upload for this version might be handled separately (e.g., via a pre-signed URL mechanism not detailed by this endpoint's direct inputs).
+**Description:** Create a new document version (meta_data). This endpoint registers a new version with content type and changes description. The actual file content upload for this version might be handled separately (e.g., via a pre-signed URL mechanism not detailed by this endpoint's direct inputs).
 
 **Required Headers:**
 - `Content-Type`: multipart/form-data
@@ -2544,7 +2544,7 @@ This document provides details about the API endpoints for the Notification Serv
   "related_entity_type": "<Optional[str]: Type of entity this notification relates to (e.g., 'task', 'project')>",
   "related_entity_id": "<Optional[str]: ID of the related entity>",
   "action_url": "<Optional[str]: URL for action when notification is clicked>",
-  "meta_data": "<Optional[Dict[str, Any]]: Additional metadata>",
+  "meta_data": "<Optional[Dict[str, Any]]: Additional meta_data>",
   "scheduled_at": "<Optional[datetime]: Timestamp for scheduled delivery, e.g., 2023-12-01T10:00:00Z>"
 }
 ```
@@ -2562,7 +2562,7 @@ This document provides details about the API endpoints for the Notification Serv
   "related_entity_type": "<Optional[str]: Related entity type>",
   "related_entity_id": "<Optional[str]: Related entity ID>",
   "action_url": "<Optional[str]: Action URL>",
-  "meta_data": "<Optional[Dict[str, Any]]: Metadata>",
+  "meta_data": "<Optional[Dict[str, Any]]: meta_data>",
   "is_read": "<bool: False initially>",
   "read_at": "<Optional[datetime]: Timestamp when read>",
   "created_at": "<datetime: Timestamp of creation>",
@@ -2637,7 +2637,7 @@ curl -X POST "http://localhost:8000/notifications" \
   "related_entity_type": "<Optional[str]: Type of entity this notification relates to>",
   "related_entity_id": "<Optional[str]: ID of the related entity>",
   "action_url": "<Optional[str]: URL for action>",
-  "meta_data": "<Optional[Dict[str, Any]]: Additional metadata>",
+  "meta_data": "<Optional[Dict[str, Any]]: Additional meta_data>",
   "scheduled_at": "<Optional[datetime]: Timestamp for scheduled delivery>"
 }
 ```
@@ -3348,7 +3348,7 @@ curl -X POST "http://localhost:8000/oauth/authorize" \
   "account_email": "<Optional[str]: Email of the connected account>",
   "account_id": "<Optional[str]: Account ID from the provider>",
   "is_active": "<bool: True if connection is active>",
-  "meta_data": "<Optional[Dict[str, Any]]: Additional metadata>",
+  "meta_data": "<Optional[Dict[str, Any]]: Additional meta_data>",
   "created_at": "<datetime: Timestamp of creation>",
   "updated_at": "<Optional[datetime]: Timestamp of last update>",
   "last_used_at": "<Optional[datetime]: Timestamp of last use>",
@@ -3412,7 +3412,7 @@ curl -X POST "http://localhost:8000/oauth/callback" \
   "account_name": "<Optional[str]: Name of the account>",
   "account_email": "<Optional[str]: Email of the account>",
   "account_id": "<Optional[str]: External account ID>",
-  "meta_data": "<Optional[Dict[str, Any]]: Additional metadata, e.g., API key if access_token is not used>",
+  "meta_data": "<Optional[Dict[str, Any]]: Additional meta_data, e.g., API key if access_token is not used>",
   "expires_at": "<Optional[datetime]: Token expiry timestamp>"
 }
 ```

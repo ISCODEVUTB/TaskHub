@@ -25,17 +25,17 @@ def test_project_create_dto_valid() -> None:
     assert dto.name == 'Project'
     assert dto.status == ProjectStatus.PLANNING
     assert dto.tags is None
-    assert dto.metadata is None
+    assert dto.meta_data is None
 
 def test_project_create_dto_invalid_name() -> None:
     with pytest.raises(Exception):
         ProjectCreateDTO(name='ab', status=ProjectStatus.PLANNING)
 
 def test_project_update_dto() -> None:
-    dto = ProjectUpdateDTO(name='New', tags=['a'], metadata={'k': 1})
+    dto = ProjectUpdateDTO(name='New', tags=['a'], meta_data={'k': 1})
     assert dto.name == 'New'
     assert dto.tags == ['a']
-    assert dto.metadata == {'k': 1}
+    assert dto.meta_data == {'k': 1}
 
 def test_project_response_dto() -> None:
     now = datetime.now()

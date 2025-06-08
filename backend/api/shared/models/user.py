@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, ForeignKey, String, Table
+from sqlalchemy import Boolean, Column, ForeignKey, String, Table, JSON
 from sqlalchemy.orm import relationship
 
 from .base import Base, BaseModel
@@ -7,22 +7,22 @@ from .base import Base, BaseModel
 user_roles = Table(
     "user_roles",
     Base.metadata,
-    Column("user_id", String, ForeignKey("users.id"), primary_key=True),
-    Column("role_id", String, ForeignKey("roles.id"), primary_key=True),
+    Column("user_id", String, ForeignKey("auth.users.id", ondelete="CASCADE"), primary_key=True),
+    Column("role_id", String, ForeignKey("roles.id", ondelete="CASCADE"), primary_key=True),
 )
 
 
 class User(BaseModel):
     """User model"""
 
-    __tablename__ = "users"
+    __tablename__ = "auth.users"
 
     email = Column(String, unique=True, nullable=False, index=True)
     full_name = Column(String, nullable=False)
     company_name = Column(String, nullable=True)
-    is_active = Column(Boolean, default=True)
-    is_verified = Column(Boolean, default=False)
-    supabase_uid = Column(String, unique=True, nullable=False)
+    avatar_url = Column(String, nullable=True)
+    is_active = Column(Boolean, nullable=False, server_default="TRUE")
+    is_verified = Column(Boolean, nullable=False, server_default="FALSE")
 
     # Relationships
     roles = relationship("Role", secondary=user_roles, back_populates="users")
@@ -58,12 +58,26 @@ class RolePermission(BaseModel):
 
     __tablename__ = "role_permissions"
 
-    role_id = Column(String, ForeignKey("roles.id"), nullable=False)
-    resource = Column(String, nullable=False)  # e.g., 'project', 'document', etc.
+    role_id = Column(
+        String,
+        ForeignKey("roles.id", ondelete="CASCADE"),
+        nullable=False
+    )
+    resource = Column(
+        String,
+        nullable=False,
+        comment="e.g., 'project', 'document', etc."
+    )
     action = Column(
-        String, nullable=False
-    )  # e.g., 'create', 'read', 'update', 'delete'
-    conditions = Column(String, nullable=True)  # JSON string with conditions
+        String,
+        nullable=False,
+        comment="e.g., 'create', 'read', 'update', 'delete'"
+    )
+    conditions = Column(
+        JSON,
+        nullable=True,
+        comment="JSON object with additional permission conditions"
+    )
 
     # Relationships
     role = relationship("Role", back_populates="permissions")
