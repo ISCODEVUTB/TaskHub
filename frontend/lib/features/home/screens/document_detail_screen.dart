@@ -86,7 +86,7 @@ class _DocumentDetailScreenState extends State<DocumentDetailScreen> {
   }
 
   Widget _buildBody() { // New _buildBody structure
-    if (_isLoading) {
+    if (_loading) {
       return const Center(child: CircularProgressIndicator());
     }
     if (_error != null) {
@@ -118,7 +118,7 @@ class _DocumentDetailScreenState extends State<DocumentDetailScreen> {
         _buildDetailItem(Icons.calendar_today, 'Creado:', dateFormat.format(doc.createdAt.toLocal())),
         if (doc.updatedAt != null)
           _buildDetailItem(Icons.edit_calendar, 'Actualizado:', dateFormat.format(doc.updatedAt!.toLocal())),
-        if (doc.type == DocumentType.LINK && doc.url != null && doc.url!.isNotEmpty)
+        if (doc.type == DocumentType.link && doc.url != null && doc.url!.isNotEmpty)
           _buildDetailItem(Icons.link, 'URL:', doc.url!),
         if (doc.contentType != null && doc.contentType!.isNotEmpty)
           _buildDetailItem(Icons.attachment, 'Tipo de Contenido:', doc.contentType!),

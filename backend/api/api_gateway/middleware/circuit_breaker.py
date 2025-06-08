@@ -23,7 +23,7 @@ class CircuitBreaker:
         self,
         failure_threshold: int = 5,
         recovery_timeout: int = 30,
-        timeout: float = 5.0,
+        timeout: float = 10.0,
     ):
         """
         Initialize CircuitBreaker.
@@ -31,7 +31,7 @@ class CircuitBreaker:
         Args:
             failure_threshold (int, optional): Number of failures before opening circuit. Defaults to 5.
             recovery_timeout (int, optional): Seconds to wait before trying again. Defaults to 30.
-            timeout (float, optional): Request timeout in seconds. Defaults to 5.0.
+            timeout (float, optional): Request timeout in seconds. Defaults to 10.0.
         """
         self.failure_threshold = failure_threshold
         self.recovery_timeout = recovery_timeout

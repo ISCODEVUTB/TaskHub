@@ -1,8 +1,12 @@
 from sqlalchemy import JSON, Boolean, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship, Mapped, mapped_column
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from .base import BaseModel
+
+if TYPE_CHECKING:
+    from .project import Project
+    from .user import User
 
 
 class Document(BaseModel):

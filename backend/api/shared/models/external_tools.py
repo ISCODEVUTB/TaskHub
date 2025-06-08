@@ -8,8 +8,12 @@ from sqlalchemy import (
     String,
 )
 from sqlalchemy.orm import relationship
+from typing import TYPE_CHECKING
 
 from .base import BaseModel
+
+if TYPE_CHECKING:
+    from .user import User
 
 
 class OAuthProvider(BaseModel):
@@ -36,9 +40,13 @@ class ExternalToolConnection(BaseModel):
 
     __tablename__ = "external_tool_connections"
 
-    user_id = Column(String, ForeignKey("users.id"), nullable=False)
-    provider_id = Column(String, ForeignKey("oauth_providers.id"), nullable=False)
-    access_token = Column(String, nullable=False)
+    user_id: str = Column(
+        String, ForeignKey("users.id"), nullable=False
+    )
+    provider_id: str = Column(
+        String, ForeignKey("oauth_providers.id"), nullable=False
+    )
+    access_token: str = Column(String, nullable=False)
     refresh_token = Column(String, nullable=True)
     token_type = Column(String, nullable=True)
     scope = Column(String, nullable=True)

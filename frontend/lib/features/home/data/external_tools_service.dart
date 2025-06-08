@@ -4,7 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'external_tools_models.dart';
 
 class ExternalToolsService {
-  static const String baseUrl = 'http://api_gateway:8000';
+  static const String baseUrl = 'http://localhost:8000';
   final storage = const FlutterSecureStorage();
 
   Future<List<OAuthProviderDTO>> getOAuthProviders() async {

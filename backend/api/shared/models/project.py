@@ -7,8 +7,14 @@ from sqlalchemy import (
     Text,
 )
 from sqlalchemy.orm import relationship
+from typing import TYPE_CHECKING
 
 from .base import BaseModel
+
+if TYPE_CHECKING:
+    from .user import User
+    from .document import Document
+    from .activity_log import ActivityLog
 
 
 class Project(BaseModel):

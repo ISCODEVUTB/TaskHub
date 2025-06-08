@@ -4,7 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'project_models.dart';
 
 class ProjectService {
-  static const String baseUrl = 'http://api_gateway:8000';
+  static const String baseUrl = 'http://localhost:8000';
   final storage = const FlutterSecureStorage();
 
   Future<List<ProjectDTO>> getProjects() async {

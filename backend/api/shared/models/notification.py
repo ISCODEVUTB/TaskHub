@@ -1,7 +1,11 @@
 from sqlalchemy import JSON, Boolean, Column, DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import relationship
+from typing import TYPE_CHECKING
 
 from .base import BaseModel
+
+if TYPE_CHECKING:
+    from .user import User
 
 
 class Notification(BaseModel):

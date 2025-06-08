@@ -7,7 +7,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from api.auth_service.app.schemas.user import (
     TokenDTO,
-    TokenValidationResponseDTO,
+    # TokenValidationResponseDTO, # No longer needed
     UserProfileDTO,
     UserRegisterDTO,
 )
@@ -67,33 +67,6 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     return auth_service.login(form_data.username, form_data.password)
 
 
-@app.get(
-    "/auth/validate", response_model=TokenValidationResponseDTO, tags=["Authentication"]
-)
-async def validate(token: str = Security(oauth2_scheme)):
-    """
-    Validate a token. Also returns user_id along with new tokens.
-
-    Args:
-        token (str): JWT token
-    """
-    return auth_service.validate_token(token)
-
-
-@app.post("/auth/refresh", response_model=TokenDTO, tags=["Authentication"])
-async def refresh(refresh_token: str) -> Any:
-    """
-    Refresh a token.
-
-    Args:
-        refresh_token (str): Refresh token
-
-    Returns:
-        TokenDTO: Authentication tokens
-    """
-    return auth_service.refresh_token(refresh_token)
-
-
 @app.post("/auth/logout", tags=["Authentication"])
 async def logout(token: str = Security(oauth2_scheme)):
     """
@@ -131,3 +104,4 @@ async def health_check() -> Any:
         Dict[str, str]: Health status
     """
     return {"status": "healthy"}
+

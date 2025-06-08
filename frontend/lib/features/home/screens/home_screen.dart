@@ -22,8 +22,8 @@ class _HomeScreenState extends State<HomeScreen> {
     const DashboardScreen(),
     const ProjectsPage(),
     const DocumentsPage(),
-    const NotificationsPage(),
-    const ExternalToolsPage(),
+    const NotificationsScreen(),
+    const ExternalToolsScreen(),
     const ProfilePage(),
   ];
 

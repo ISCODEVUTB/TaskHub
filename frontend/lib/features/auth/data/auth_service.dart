@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart'; // ChangeNotifier is here
 // This is a simplified auth service. In a real app, you would integrate
 // with Firebase Auth, your own backend, or another auth provider.
 class AuthService extends ChangeNotifier {
-  static const String baseUrl = 'http://api_gateway:8000';
+  static const String baseUrl = 'http://localhost:8000';
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   UserProfileDTO? _currentUser;

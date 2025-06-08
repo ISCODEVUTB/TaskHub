@@ -385,13 +385,13 @@ class _ProjectDetailPageState extends State<ProjectDetailPage>
         final doc = _projectDocuments[index];
         IconData docIcon;
         switch (doc.type) {
-          case DocumentType.FOLDER:
+          case DocumentType.folder:
             docIcon = Icons.folder;
             break;
-          case DocumentType.LINK:
+          case DocumentType.link:
             docIcon = Icons.link;
             break;
-          case DocumentType.FILE:
+          case DocumentType.file:
           default:
             docIcon = Icons.insert_drive_file;
             break;

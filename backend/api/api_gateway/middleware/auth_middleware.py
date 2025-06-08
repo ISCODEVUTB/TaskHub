@@ -1,21 +1,25 @@
 import os
 from typing import Awaitable, Callable, Optional
 
-import httpx
 from dotenv import load_dotenv
 from fastapi import HTTPException, Request, status
 from fastapi.responses import JSONResponse
+from jose import ExpiredSignatureError, JWTError, jwt
 
 # Load environment variables
 load_dotenv()
 
-# Auth service URL
-AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "http://localhost:8001")
+SUPABASE_JWT_SECRET = os.getenv("SUPABASE_JWT_SECRET")
+SUPABASE_AUDIENCE = os.getenv("SUPABASE_AUDIENCE", "authenticated")
+# Optional: Add SUPABASE_ISSUER if you want to validate the 'iss' claim, e.g.:
+# SUPABASE_ISSUER = os.getenv("SUPABASE_ISSUER")
 
 
 async def auth_middleware(
     request: Request, call_next: Callable[[Request], Awaitable[JSONResponse]]
 ) -> JSONResponse:
+    if request.method == "OPTIONS":
+        return await call_next(request)
     """
     Middleware for authentication.
 
@@ -102,56 +106,44 @@ def _get_token_from_request(request: Request) -> Optional[str]:
 
 
 async def _validate_token(token: str) -> str:
-    """
-    Validate token with auth service.
-
-    Args:
-        token (str): JWT token
-
-    Returns:
-        str: User ID
-
-    Raises:
-        HTTPException: If token is invalid
-    """
-    try:
-        # Make request to auth service
-        async with httpx.AsyncClient() as client:
-            response = await client.get(
-                f"{AUTH_SERVICE_URL}/auth/validate",
-                headers={"Authorization": f"Bearer {token}"},
-            )
-
-            # Check response
-            if response.status_code != 200:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
-                )
-
-            # Parse response
-            data = response.json()
-
-            # Extract user ID from token
-            # In a real application, you would decode the token and extract the user ID
-            # For simplicity, we'll assume the auth service returns the user ID
-            user_id = data.get("user_id")
-
-            if not user_id:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Invalid token, user_id not in response",
-                )
-
-            return user_id
-    except httpx.RequestError as e:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"Auth service unavailable: {str(e)}",
-        )
-    except Exception as e:
-        # It's good practice to log the error here
-        # logger.error(f"Unexpected error during token validation with auth service: {str(e)}")
+    if not SUPABASE_JWT_SECRET:
+        print('ERROR: SUPABASE_JWT_SECRET is not configured in the environment.')
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred while validating the token.",
+            detail='Authentication system configuration error.',
+        )
+
+    try:
+        payload = jwt.decode(
+            token,
+            SUPABASE_JWT_SECRET,
+            algorithms=['HS256'], 
+            audience=SUPABASE_AUDIENCE
+            # If validating issuer, add: issuer=SUPABASE_ISSUER 
+        )
+        
+        user_id = payload.get('sub')
+        if not user_id:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail='Invalid token: User ID (sub) not found in token.',
+            )
+        
+        return user_id
+
+    except ExpiredSignatureError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail='Token has expired.'
+        )
+    except JWTError as e:
+        print(f'JWTError during token validation: {str(e)}') # Server log
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail='Invalid token.', 
+        )
+    except Exception as e:
+        print(f'Unexpected error during token validation: {str(e)}') # Server log
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail='An unexpected error occurred during token validation.',
         )

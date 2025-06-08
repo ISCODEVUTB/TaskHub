@@ -4,7 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'notification_models.dart';
 
 class NotificationService {
-  static const String baseUrl = 'http://api_gateway:8000';
+  static const String baseUrl = 'http://localhost:8000';
   final storage = const FlutterSecureStorage();
 
   Future<List<NotificationDTO>> getNotifications() async {
